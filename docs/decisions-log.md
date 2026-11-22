@@ -97,3 +97,8 @@ Decisions made *before* approval are in the design
     - Situation: the plan says typing a digit restarts the 10-second idle wait, but says nothing about the delete key or about saved data that cannot be read.
     - Chose: the delete key also restarts the wait; saved data that is not valid JSON, or cannot be read or written, starts the app fresh and writes one warning to the console.
     - Why: a child-proof keypad should not close on a parent who is still pressing keys, and a silent fallback would hide a real problem.
+
+18. **The 30-second wait after three wrong codes is not saved.**
+    - Situation: a reviewer noted that closing and reopening the app clears the wait.
+    - Chose: leave it that way.
+    - Why: a young child cannot close and reopen a full-screen home-screen app to dodge it, and the code itself (1 in 10,000) is the real protection. Reversible if the kids prove craftier.
