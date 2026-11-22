@@ -1,7 +1,7 @@
 # Kids Timer: Design
 
 Date: 2026-11-22
-Status: awaiting approval
+Status: approved by owner 2026-11-22 (spoken reminders removed from this version at approval)
 
 Throughout this document, **(ruled)** marks something the owner decided in
 conversation. **(my call)** marks something the designer filled in; the owner
@@ -49,6 +49,7 @@ Not in this version:
 - Named timers, saved routines, schedules that start on their own, history.
 - Alarms that fire while the app is closed or the screen is locked.
 - Custom or uploaded sounds.
+- Spoken reminders ("ten minutes left"). (ruled)
 
 ## 4. Anti-goals
 
@@ -76,8 +77,6 @@ The parent sees this when no timer is running.
 - On the very first open, the parent sets a passcode first. See 5.6.
 - Ring direction: two buttons, "Fills up" and "Empties". (ruled) The choice is
   remembered on the device. First-ever default is "Empties". (my call)
-- "Say the time out loud" switch, off by default. See 5.5. (my call; the
-  owner called spoken reminders good to have, not necessary)
 
 Invalid input (empty, zero, non-numeric, over the maximum) is rejected with a
 short plain message next to the field. Nothing starts.
@@ -144,12 +143,11 @@ The 3-minute ding has no color change of its own. (my reading of the ruling)
 A timer that starts at 5 minutes or less starts in Warm. Stages change with a
 smooth transition, never a flash.
 
-### 5.5 Spoken reminders (good to have)
+### 5.5 Spoken reminders
 
-When the switch is on, the device's built-in voice says "15 minutes left",
-"10 minutes left", and so on right after each ding, and "Time's up" at the
-end. If the device has no usable voice, the switch is hidden. This is the
-first thing to drop if it proves unreliable on the owner's devices.
+Not in this version. (ruled at approval: "skip the spoken voice feature for
+now") The owner earlier called a spoken "ten minutes left" good to have, so it
+is a candidate for a later version.
 
 ### 5.6 The lock
 
@@ -300,9 +298,12 @@ Order of work and fallback (my call, raised by the design reviewer):
 - If that check fails, stop and take it back to the owner. Do not switch to
   another host or tunnel without their decision; why they preferred ngrok
   over a public host was not recorded.
-- Three checks need the owner's own hands and devices: the offline save
-  through ngrok (first milestone), the iPhone silent switch, and the built-in
-  voice. Plan them as short owner checkpoints, the first one early.
+- Two checks need the owner's own hands and devices: the offline save
+  through ngrok (first milestone) and the iPhone silent switch.
+- At approval the owner asked for the whole build to run without stopping for
+  them. So these checks are not gates: build everything, verify what can be
+  verified on the MacBook, and hand the owner a short device checklist at the
+  end. (my call on how to square the two)
 
 ## 8. How it gets made (all my calls)
 
