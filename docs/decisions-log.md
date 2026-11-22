@@ -82,3 +82,13 @@ Decisions made *before* approval are in the design
     - Situation: later tasks add browser tests under e2e/ that must not run as unit tests.
     - Chose: the unit-test runner only looks at src/**/*.test.ts, and its settings sit in vite.config.ts.
     - Why: one config file, and the two kinds of test can never get mixed up.
+
+15. **"Until a clock time" never counts more than 24 hours, even on a clock-change day.**
+    - Situation: on the night the clocks go back, "the same time tomorrow" is really 25 hours away, but the longest timer is 24 hours.
+    - Chose: the wait is capped at 24 hours.
+    - Why: keeps the timer inside its one hard limit; it only matters for a target set to exactly now on that one night.
+
+16. **Changing the code does not count wrong guesses toward the 30-second wait.**
+    - Situation: the change-code screen asks for the current code, and the plan only gives the lock rules to the main keypad.
+    - Chose: a wrong current code just shows "That's not the current code." and starts that step over.
+    - Why: the screen is only reachable after the parent already opened the controls with the code, so a second lock adds nothing.
