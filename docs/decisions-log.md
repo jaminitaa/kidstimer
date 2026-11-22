@@ -77,3 +77,8 @@ Decisions made *before* approval are in the design
 ## Building
 
 (entries added below as the build proceeds)
+
+14. **Test settings live in the one Vite config file, limited to unit tests.**
+    - Situation: later tasks add browser tests under e2e/ that must not run as unit tests.
+    - Chose: the unit-test runner only looks at src/**/*.test.ts, and its settings sit in vite.config.ts.
+    - Why: one config file, and the two kinds of test can never get mixed up.

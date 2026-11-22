@@ -41,6 +41,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# build and test output
+/dist
+/test-results
+/playwright-report
+/blob-report
+
 # cache
 .cache
 .eslintcache
