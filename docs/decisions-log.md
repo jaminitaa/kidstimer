@@ -92,3 +92,8 @@ Decisions made *before* approval are in the design
     - Situation: the change-code screen asks for the current code, and the plan only gives the lock rules to the main keypad.
     - Chose: a wrong current code just shows "That's not the current code." and starts that step over.
     - Why: the screen is only reachable after the parent already opened the controls with the code, so a second lock adds nothing.
+
+17. **Deleting a keypad digit counts as touching the keypad, and unreadable saved data is reported.**
+    - Situation: the plan says typing a digit restarts the 10-second idle wait, but says nothing about the delete key or about saved data that cannot be read.
+    - Chose: the delete key also restarts the wait; saved data that is not valid JSON, or cannot be read or written, starts the app fresh and writes one warning to the console.
+    - Why: a child-proof keypad should not close on a parent who is still pressing keys, and a silent fallback would hide a real problem.
