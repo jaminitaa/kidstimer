@@ -1,9 +1,9 @@
 // Wiring only: every rule lives in a tested module. This file is left out of unit coverage.
 import './ui/styles/index.css';
 import { registerSW } from 'virtual:pwa-register';
-import { createTicker, soundName } from './app/effects';
+import { createTicker, shouldReloadForUpdate, soundName } from './app/effects';
 import { mountShell, showStartupError } from './app/shell';
-import { initialState } from './app/state';
+import { initialState, type AppState } from './app/state';
 import { createStorage } from './app/storage';
 import { createStore } from './app/store';
 import { TICK_MS } from './core/constants';
@@ -24,7 +24,15 @@ import { createTimerView } from './ui/timerView';
  */
 const UNLOCK_EVENTS = ['pointerdown', 'pointerup', 'touchend', 'keydown'] as const;
 
-function start(root: HTMLElement): void {
+function listenForSoundUnlock(unlock: () => Promise<unknown>, render: () => void): void {
+  const unlockSound = (): void => void unlock().then(render);
+  for (const type of UNLOCK_EVENTS) {
+    document.addEventListener(type, unlockSound, { capture: true, passive: true });
+  }
+}
+
+/** Builds and runs the app. Returns how to read its state. */
+function start(root: HTMLElement): () => AppState {
   const storage = createStorage(localStorage);
   const store = createStore(initialState(storage.load()), Date.now);
   const { dispatch, getState } = store;
@@ -69,18 +77,25 @@ function start(root: HTMLElement): void {
 
   attachHold(timerView.el, () => dispatch({ type: 'open-keypad' }));
   attachKeyboard(document, getState, dispatch);
+  listenForSoundUnlock(() => sound.unlock(), render);
+  return getState;
+}
 
-  const unlockSound = (): void => void sound.unlock().then(render);
-  for (const type of UNLOCK_EVENTS) {
-    document.addEventListener(type, unlockSound, { capture: true, passive: true });
+/** A new version has taken over: reload now only if that cannot disturb a timer. */
+function onNewVersion(getState: () => AppState): void {
+  if (shouldReloadForUpdate(getState())) {
+    window.location.reload();
+    return;
   }
+  console.info('A new version is ready. It will show the next time the timer is opened.');
 }
 
 /** Saves the app on the device so it opens with no network. Built app only, never `npm run dev`. */
-function registerOffline(): void {
+function registerOffline(getState: () => AppState): void {
   if (!import.meta.env.PROD) return;
   registerSW({
     immediate: true,
+    onNeedReload: () => onNewVersion(getState),
     onRegisterError: (error) => console.warn('Offline use could not be set up.', error),
   });
 }
@@ -88,8 +103,7 @@ function registerOffline(): void {
 const root = document.getElementById('app');
 try {
   if (root === null) throw new Error('The page has no #app element.');
-  start(root);
-  registerOffline();
+  registerOffline(start(root));
 } catch (error) {
   console.error('The timer could not start.', error);
   showStartupError(root ?? document.body);

@@ -1,7 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { OVERLAY_IDLE_MS, STALE_TICK_MS, TICK_MS } from '../core/constants';
 import type { Timer } from '../core/timer';
-import { createTicker, needsSoundHint, snapshotOf, soundName, wantsWake } from './effects';
+import {
+  createTicker,
+  needsSoundHint,
+  shouldReloadForUpdate,
+  snapshotOf,
+  soundName,
+  wantsWake,
+} from './effects';
 import { initialState, type AppState } from './state';
 
 const NOW = 1_000_000;
@@ -50,6 +57,19 @@ describe('needsSoundHint', () => {
     expect(needsSoundHint(stateWith(running(0)), NOW, false)).toBe(false);
     expect(needsSoundHint(stateWith(PAUSED), NOW, false)).toBe(false);
     expect(needsSoundHint(stateWith(null), NOW, false)).toBe(false);
+  });
+});
+
+describe('shouldReloadForUpdate', () => {
+  it('reloads for a new version only when there is no timer', () => {
+    expect(shouldReloadForUpdate(stateWith(null))).toBe(true);
+  });
+
+  it('waits for the next open while any timer exists: running, paused or finished', () => {
+    expect(shouldReloadForUpdate(stateWith(running(600_000)))).toBe(false);
+    expect(shouldReloadForUpdate(stateWith(PAUSED))).toBe(false);
+    expect(shouldReloadForUpdate(stateWith(running(-5_000)))).toBe(false);
+    expect(shouldReloadForUpdate(stateWith(running(600_000), { overlay: 'controls' }))).toBe(false);
   });
 });
 

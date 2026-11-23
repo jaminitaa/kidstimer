@@ -20,6 +20,15 @@ export function needsSoundHint(state: AppState, now: number, soundUnlocked: bool
   return !soundUnlocked && wantsWake(state, now);
 }
 
+/**
+ * A new version of the app has taken over. Reloading would lock sound again and drop the
+ * screen wake lock, so reload only when no timer exists; otherwise the new version shows
+ * the next time the app is opened.
+ */
+export function shouldReloadForUpdate(state: AppState): boolean {
+  return state.timer === null;
+}
+
 /** The marker the page records for each sound: "ding-5", "tune". */
 export function soundName(effect: SoundEffect): string {
   return effect.kind === 'tune' ? 'tune' : `ding-${effect.minutes}`;
