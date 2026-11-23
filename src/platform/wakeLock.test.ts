@@ -103,6 +103,37 @@ describe('createWakeLock', () => {
     expect(request).toHaveBeenCalledTimes(2);
   });
 
+  it('asks again on the next tap or key press after a refusal', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { nav, request } = fakeNav();
+    request.mockRejectedValueOnce(new Error('NotAllowedError'));
+    const { doc } = fakeDoc();
+    const lock = createWakeLock(nav, doc);
+    await lock.setActive(true);
+    expect(request).toHaveBeenCalledTimes(1);
+
+    doc.dispatchEvent(new Event('pointerup'));
+    expect(request).toHaveBeenCalledTimes(2); // Asked inside the tap itself, not later.
+    await settle();
+    for (const type of ['pointerdown', 'pointerup', 'touchend', 'keydown']) {
+      doc.dispatchEvent(new Event(type));
+    }
+    await settle();
+    expect(request).toHaveBeenCalledTimes(2); // Now held: taps ask for nothing more.
+  });
+
+  it('does not ask on a tap when no lock is wanted', async () => {
+    const { nav, request } = fakeNav();
+    const { doc } = fakeDoc();
+    const lock = createWakeLock(nav, doc);
+    doc.dispatchEvent(new Event('pointerdown'));
+    await lock.setActive(true);
+    await lock.setActive(false);
+    doc.dispatchEvent(new Event('keydown'));
+    await settle();
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
   it('warns and does not throw when releasing fails', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const { nav, sentinels } = fakeNav();
