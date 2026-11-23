@@ -163,3 +163,53 @@ for (const viewport of [PHONE_PORTRAIT, PHONE_LANDSCAPE, TV]) {
     });
   });
 }
+
+/** A symbol far wider than an emoji, and a letter under a heavy stack of combining marks. */
+const ODD_LABELS: readonly { readonly name: string; readonly text: string }[] = [
+  { name: 'four very wide symbols', text: '﷽﷽﷽﷽' },
+  { name: 'a letter with many stacked marks', text: `a${'̀'.repeat(30)}bcd` },
+];
+
+for (const viewport of [PHONE_PORTRAIT, PHONE_LANDSCAPE]) {
+  test.describe(`odd symbols at ${sizeName(viewport)}`, () => {
+    test.use({ viewport });
+
+    for (const { name, text } of ODD_LABELS) {
+      test(`${name} stay inside the ring and clear of the digits`, async ({ page }) => {
+        await readyApp(page);
+        await setLabel(page, text);
+        await startCustom(page, '5');
+        await expect(timerLabel(page)).toHaveText(text);
+        const g = await measure(page, null);
+        const label = showing(g.label, 'emoji line');
+        expectNoScroll(g);
+        expectBoxInsideRing(label, g, 'emoji line');
+        expect(overlaps(label, g.digits), 'the emoji line overlaps the digits').toBe(false);
+      });
+    }
+  });
+}
+
+for (const viewport of [PHONE_PORTRAIT, PHONE_LANDSCAPE]) {
+  test.describe(`tallest stack under the lock at ${sizeName(viewport)}`, () => {
+    test.use({ viewport });
+
+    test("the keypad leaves the line and Time's up! in full view", async ({ page }) => {
+      await readyApp(page);
+      await runToTimesUp(page, LABEL);
+      await holdToOpen(page);
+      await expect(keypadOverlay(page)).toBeVisible();
+      const g = await measure(page, 'keypad-overlay');
+      const panel = showing(g.panel, 'keypad');
+      expectNoScroll(g);
+      for (const [box, what] of [
+        [showing(g.label, 'emoji line'), 'emoji line'],
+        [showing(g.timesUp, "Time's up!"), "Time's up!"],
+      ] as const) {
+        expectInViewport(box, g.viewport, what);
+        expectBoxInsideRing(box, g, what);
+        expect(overlaps(box, panel), `the keypad covers the ${what}`).toBe(false);
+      }
+    });
+  });
+}

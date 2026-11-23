@@ -116,7 +116,7 @@
 /*
  * Up to four emojis, a share of the ring like the digits. 0.12 leaves the line's corners
  * and those of "Time's up!" beneath it inside the ring with a few percent to spare; the
- * widest case is Safari's emoji (1.08em each). A line-height of 1.1 and the side padding
+ * widest case is Safari's emoji (about 1.105em each, 49 px at a 44.3 px font). A line-height of 1.1 and the side padding
  * keep each emoji's drawing inside the box (Chrome draws slightly past an emoji's width).
  */
 .timer-label {
@@ -139,6 +139,18 @@
   white-space: nowrap;
   color: var(--stage-digits);
   transition: color var(--stage-fade) ease-in-out;
+}
+
+/*
+ * Each symbol gets a box a little bigger than any emoji (Safari's is the widest, about
+ * 1.105em) and what goes past it is cut off, so a very wide or heavily stacked character
+ * can never draw outside the ring or over the digits.
+ */
+.timer-label-symbol {
+  flex: none;
+  max-width: 1.15em;
+  max-height: 1.15em;
+  overflow: hidden;
 }
 
 /* Under the emoji line, "Time's up!" keeps its size and sits a little closer. */
