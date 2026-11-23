@@ -12,24 +12,23 @@ import {
   readyApp,
   startCustom,
 } from './helpers';
+import {
+  expectBoxInsideRing,
+  expectInViewport,
+  expectNoScroll,
+  LAPTOP,
+  measure,
+  overlaps,
+  PHONE_LANDSCAPE,
+  PHONE_PORTRAIT,
+  sizeName,
+  TABLET,
+  TV,
+  type Box,
+  type Geometry,
+  type Size,
+} from './layoutHelpers';
 
-type Size = { readonly width: number; readonly height: number };
-type Box = {
-  readonly left: number;
-  readonly top: number;
-  readonly right: number;
-  readonly bottom: number;
-};
-type Point = { readonly x: number; readonly y: number };
-type Geometry = {
-  readonly viewport: Size;
-  readonly page: Size;
-  readonly ring: Box;
-  readonly center: Point;
-  readonly innerRadius: number;
-  readonly digits: Box;
-  readonly panel: Box | null;
-};
 type Target = { readonly name: string; readonly width: number; readonly height: number };
 type Reading = { readonly text: string; readonly start: (page: Page) => Promise<void> };
 type Part = { readonly name: string; readonly box: Box };
@@ -40,16 +39,8 @@ type CodeScreenLayout = {
   readonly parts: readonly Part[];
 };
 
-const PHONE_PORTRAIT: Size = { width: 393, height: 852 };
-const PHONE_LANDSCAPE: Size = { width: 852, height: 393 };
-const TABLET: Size = { width: 1180, height: 820 };
-const TV: Size = { width: 1920, height: 1080 };
-const LAPTOP: Size = { width: 1280, height: 800 };
-
 /** The smallest comfortable touch target, in CSS pixels. */
 const MIN_TARGET_PX = 44;
-/** Allowance for sub-pixel rounding in layout. */
-const EPSILON = 0.5;
 
 /** Every key of the code screen's keypad: ten digits and delete. */
 const KEY_IDS: readonly string[] = [...'0123456789'].map((digit) => `key-${digit}`).concat('key-delete');
@@ -58,8 +49,6 @@ const CODE_PARTS: readonly string[] = ['code-title', 'dots', 'code-error', ...KE
 /** Not the code each journey sets, so the change-code screen shows its error line. */
 const WRONG_CODE = '1357';
 
-const sizeName = ({ width, height }: Size): string => `${width}x${height}`;
-
 /** The shortest and longest readings, and how each is reached from the setup screen. */
 const READINGS: readonly Reading[] = [
   { text: '05:00', start: (page) => page.getByTestId('preset-5').click() },
@@ -67,74 +56,9 @@ const READINGS: readonly Reading[] = [
   { text: '1440:00', start: (page) => startCustom(page, '1440') },
 ];
 
-/** Reads where the ring, the digits and the open lock panel (if any) are on screen. */
-function measure(page: Page, panelTestId: string | null): Promise<Geometry> {
-  return page.evaluate((panelId) => {
-    const find = (selector: string): Element => {
-      const el = document.querySelector(selector);
-      if (el === null) throw new Error(`Nothing matches ${selector}.`);
-      return el;
-    };
-    const boxOf = (el: Element) => {
-      const { left, top, right, bottom } = el.getBoundingClientRect();
-      return { left, top, right, bottom };
-    };
-    const track = find('[data-testid="ring-track"]') as SVGCircleElement;
-    const svg = track.ownerSVGElement;
-    if (svg === null) throw new Error('The ring track is not inside an <svg>.');
-    const ring = svg.getBoundingClientRect();
-    const unitsToPx = ring.width / svg.viewBox.baseVal.width;
-    const strokeInnerEdge = track.r.baseVal.value - Number(track.getAttribute('stroke-width')) / 2;
-    const doc = document.documentElement;
-    return {
-      viewport: { width: doc.clientWidth, height: doc.clientHeight },
-      page: { width: doc.scrollWidth, height: doc.scrollHeight },
-      ring: boxOf(svg),
-      center: { x: ring.left + ring.width / 2, y: ring.top + ring.height / 2 },
-      innerRadius: strokeInnerEdge * unitsToPx,
-      digits: boxOf(find('[data-testid="digits"]')),
-      panel: panelId === null ? null : boxOf(find(`[data-testid="${panelId}"]`)),
-    };
-  }, panelTestId);
-}
-
-function expectNoScroll(g: Geometry): void {
-  expect(g.page.width, 'page is wider than the screen').toBeLessThanOrEqual(g.viewport.width);
-  expect(g.page.height, 'page is taller than the screen').toBeLessThanOrEqual(g.viewport.height);
-}
-
-function expectInViewport(box: Box, viewport: Size, what: string): void {
-  expect(box.left, `${what}: left edge off screen`).toBeGreaterThanOrEqual(-EPSILON);
-  expect(box.top, `${what}: top edge off screen`).toBeGreaterThanOrEqual(-EPSILON);
-  expect(box.right, `${what}: right edge off screen`).toBeLessThanOrEqual(viewport.width + EPSILON);
-  expect(box.bottom, `${what}: bottom edge off screen`).toBeLessThanOrEqual(
-    viewport.height + EPSILON,
-  );
-}
-
 /** Every corner of the digits' box lies within the inner edge of the ring's stroke. */
 function expectDigitsInsideRing(g: Geometry): void {
-  const corners: readonly Point[] = [
-    { x: g.digits.left, y: g.digits.top },
-    { x: g.digits.right, y: g.digits.top },
-    { x: g.digits.left, y: g.digits.bottom },
-    { x: g.digits.right, y: g.digits.bottom },
-  ];
-  for (const corner of corners) {
-    const distance = Math.hypot(corner.x - g.center.x, corner.y - g.center.y);
-    expect(distance, 'a corner of the digits crosses the ring').toBeLessThanOrEqual(
-      g.innerRadius + EPSILON,
-    );
-  }
-}
-
-function overlaps(a: Box, b: Box): boolean {
-  const apart =
-    a.right <= b.left + EPSILON ||
-    b.right <= a.left + EPSILON ||
-    a.bottom <= b.top + EPSILON ||
-    b.bottom <= a.top + EPSILON;
-  return !apart;
+  expectBoxInsideRing(g.digits, g, 'digits');
 }
 
 function expectLockLayout(g: Geometry): void {

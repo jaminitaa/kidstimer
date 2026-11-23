@@ -101,6 +101,19 @@
   color: #ffffff;
 }
 
+/* What for?: the four quick picks, four across at every width (81 px each on a 393 px phone). */
+.pick-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.btn-pick {
+  padding: 0;
+  font-size: 1.5rem;
+  white-space: nowrap;
+}
+
 .field {
   flex: 1;
   border: 3px solid var(--stage-ring);

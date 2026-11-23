@@ -2,11 +2,19 @@
 import { describe, expect, it, vi } from 'vitest';
 import { initialState } from '../app/state';
 import type { RingDirection } from '../core/ring';
+import { startTimer, type Timer } from '../core/timer';
 import { createSetupView } from './setupView';
 
 const NINE_AM = new Date(2026, 10, 22, 9, 0, 0, 0);
 const FORTY_SECONDS_TO_HALF_PAST = new Date(2026, 10, 22, 9, 29, 20, 0);
 const ONE_MINUTE_TO_HALF_PAST = new Date(2026, 10, 22, 9, 29, 0, 0);
+const FIVE_EMOJIS = '📺🛏️💤👟🚗';
+const FIRST_FOUR = '📺🛏️💤👟';
+
+function stateWith(timer: Timer | null) {
+  const settings = { ringDirection: 'empties', passcode: '2580' } as const;
+  return initialState({ settings, timer, label: '' });
+}
 
 function setup(now: Date = NINE_AM) {
   const dispatch = vi.fn();
@@ -100,7 +108,7 @@ describe('createSetupView', () => {
     part('direction-fills').click();
     expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'set-direction', direction: 'fills' });
     const show = (ringDirection: RingDirection) =>
-      view.update(initialState({ settings: { ringDirection, passcode: '2580' }, timer: null, label: '' }), 0);
+      view.update({ ...stateWith(null), settings: { ringDirection, passcode: '2580' } }, 0);
     show('fills');
     expect(part('direction-fills').getAttribute('aria-pressed')).toBe('true');
     expect(part('direction-empties').getAttribute('aria-pressed')).toBe('false');
@@ -119,5 +127,103 @@ describe('createSetupView', () => {
     const { part, dispatch } = setup();
     part('change-code').click();
     expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'begin-change-code' });
+  });
+});
+
+describe('createSetupView: What for?', () => {
+  it('comes first, above How long?', () => {
+    const { view } = setup();
+    const headings = [...view.el.querySelectorAll('.setup-label')].map((h) => h.textContent);
+    expect(headings.slice(0, 2)).toEqual(['What for?', 'How long?']);
+  });
+
+  it('has an empty, labelled text box', () => {
+    const { part } = setup();
+    const box = part<HTMLInputElement>('label-input');
+    expect(box.tagName).toBe('INPUT');
+    expect(box.type).toBe('text');
+    expect(box.value).toBe('');
+    expect(box.getAttribute('aria-label')).toBe('What for');
+    expect(box.getAttribute('autocomplete')).toBe('off');
+  });
+
+  it('keeps only the first 4 symbols as you type', () => {
+    const { part, type } = setup();
+    type('label-input', FIVE_EMOJIS);
+    expect(part<HTMLInputElement>('label-input').value).toBe(FIRST_FOUR);
+  });
+
+  it('leaves the text alone while a word is still being composed, and trims it once done', () => {
+    const { part } = setup();
+    const box = part<HTMLInputElement>('label-input');
+    box.value = FIVE_EMOJIS;
+    box.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true }));
+    expect(box.value).toBe(FIVE_EMOJIS);
+    box.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+    expect(box.value).toBe(FIRST_FOUR);
+  });
+
+  it('has the four quick picks in order, each named for a screen reader', () => {
+    const { view, part } = setup();
+    const picks = [...view.el.querySelectorAll<HTMLElement>('[data-testid^="pick-"]')];
+    const ids = picks.map((p) => p.dataset.testid);
+    expect(ids).toEqual(['pick-tv', 'pick-bed', 'pick-shoes', 'pick-slide']);
+    expect(picks.every((p) => p.tagName === 'BUTTON')).toBe(true);
+    expect(part('pick-bed').textContent).toBe('🛏️💤');
+    expect(part('pick-bed').getAttribute('aria-label')).toBe('Bed and zzz');
+  });
+
+  it('fills the box from a quick pick, replacing what was there', () => {
+    const { part, type } = setup();
+    part('pick-shoes').click();
+    expect(part<HTMLInputElement>('label-input').value).toBe('👟🚗');
+    type('label-input', '📺');
+    part('pick-slide').click();
+    expect(part<HTMLInputElement>('label-input').value).toBe('🛝');
+  });
+
+  it('sends what is in the box with every way of starting', () => {
+    const { part, dispatch, type } = setup();
+    part('pick-shoes').click();
+    part('preset-5').click();
+    type('custom-minutes', '10');
+    part('custom-start').click();
+    type('until-time', '09:30');
+    part('until-start').click();
+    expect(dispatch.mock.calls).toEqual([
+      [{ type: 'start', durationMs: 300_000, label: '👟🚗' }],
+      [{ type: 'start', durationMs: 600_000, label: '👟🚗' }],
+      [{ type: 'start', durationMs: 1_800_000, label: '👟🚗' }],
+    ]);
+  });
+
+  it('sends an empty label when the box is empty', () => {
+    const { part, dispatch } = setup();
+    part('preset-5').click();
+    const expected = { type: 'start', durationMs: 300_000, label: '' };
+    expect(dispatch).toHaveBeenCalledExactlyOnceWith(expected);
+  });
+
+  it('keeps the box when the start screen is redrawn with no timer', () => {
+    const { view, part, type } = setup();
+    type('label-input', '👟');
+    view.update(stateWith(null), 0);
+    expect(part<HTMLInputElement>('label-input').value).toBe('👟');
+  });
+
+  it('empties the box once a timer is running', () => {
+    const { view, part, type } = setup();
+    type('label-input', '👟');
+    view.update(stateWith(startTimer(300_000, 0)), 0);
+    expect(part<HTMLInputElement>('label-input').value).toBe('');
+  });
+
+  it('empties the box when the start screen comes back into view', () => {
+    const { view, part, type } = setup();
+    type('label-input', '👟');
+    // The shell hides the start screen while a timer runs, and redraws it just before showing it.
+    view.el.hidden = true;
+    view.update(stateWith(null), 0);
+    expect(part<HTMLInputElement>('label-input').value).toBe('');
   });
 });

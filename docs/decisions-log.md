@@ -227,3 +227,23 @@ choices are tagged "(my call)". Nothing below was ruled by the owner.
     - Situation: saved data is checked when the app opens. A line that is not text, or is longer than 4 symbols, is bad data.
     - Chose: show the timer with no line.
     - Why: losing the picture is harmless; losing a running timer is not.
+
+39. **How big the emojis are, and how they are spaced.**
+    - Situation: the plan asks for the line to be as large as fits inside the ring, and never smaller than 9% of the ring's width, but leaves the exact size and spacing to the builder.
+    - Chose: each emoji is 12% of the ring's width (about 44 pixels on a phone, 120 on the TV), centred under the digits with the same small gap between each pair. The digits do not move or shrink when a line is showing.
+    - Why: this is close to the largest size that keeps four emojis inside the ring with a little room to spare. It was measured in Chrome and in Safari's engine on a phone held upright and sideways, a tablet and the TV, with the longest time (1440:00) and with the lock panel open. On a phone, the corners of four emojis stay about 8 pixels inside the ring in Safari's engine (which draws emojis widest) and about 16 in Chrome. Any bigger would leave almost no room for a device that draws emojis a little wider.
+
+40. **"Time's up!" when a line is showing.**
+    - Situation: the plan puts "Time's up!" under the emojis, and allows it to be smaller only if both cannot fit at its usual size.
+    - Chose: "Time's up!" keeps its usual size and sits just under the emojis, a little closer to them than it sits to the digits when there is no line. With no line, it is exactly where it was before.
+    - Why: both fit at the usual size, so nothing needed to shrink. On a phone, the corners of "Time's up!" stay about 8 pixels inside the ring.
+
+41. **The "What for?" box and its four buttons.**
+    - Situation: the design leaves the look of the quick picks and the box's grey hint text to the builder.
+    - Chose: the box looks like the other boxes on the start screen and shows "Emojis" in grey while empty. The four quick picks sit in one row under it, four across on every screen, showing only their emojis; a screen reader reads out their names ("TV", "Bed and zzz", "Shoes and car", "Slide"). With a keyboard that builds a character in several steps (Japanese, for example), the box waits until the character is finished before keeping the first four.
+    - Why: one row keeps the section short, so the time buttons stay near the top of a phone screen; each button is 81 pixels wide on the narrowest phone, well over the 44-pixel minimum. Trimming halfway through a character could cut it in two.
+
+42. **The box is emptied whenever the start screen comes back.**
+    - Situation: entry 37 says the box is cleared the moment a timer starts. But the app does not redraw the start screen while it is hidden, so the start screen never sees the timer start.
+    - Chose: empty the box each time the start screen comes back into view: after a timer is stopped or finishes, and also after going to "Change code" and back. While the parent stays on the start screen (tapping a ring direction, say), the box keeps what was typed.
+    - Why: the start screen can always tell when it is about to be shown again, and this matches the design's "the box is empty each time the start screen appears". Nothing typed is wiped while the parent is still on the screen. The one difference from entry 37: emojis typed before going to "Change code" are gone on the way back.
