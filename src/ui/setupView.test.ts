@@ -131,6 +131,32 @@ describe('createSetupView', () => {
 });
 
 describe('createSetupView: What for?', () => {
+  type Harness = ReturnType<typeof setup>;
+  type StartWay = {
+    readonly how: string;
+    readonly durationMs: number;
+    readonly begin: (harness: Harness) => void;
+  };
+  const START_WAYS: readonly StartWay[] = [
+    { how: 'a preset', durationMs: 300_000, begin: ({ part }) => part('preset-5').click() },
+    {
+      how: 'custom minutes',
+      durationMs: 600_000,
+      begin: ({ part, type }) => {
+        type('custom-minutes', '10');
+        part('custom-start').click();
+      },
+    },
+    {
+      how: 'until a time',
+      durationMs: 1_800_000,
+      begin: ({ part, type }) => {
+        type('until-time', '09:30');
+        part('until-start').click();
+      },
+    },
+  ];
+
   it('comes first, above How long?', () => {
     const { view } = setup();
     const headings = [...view.el.querySelectorAll('.setup-label')].map((h) => h.textContent);
@@ -182,19 +208,13 @@ describe('createSetupView: What for?', () => {
     expect(part<HTMLInputElement>('label-input').value).toBe('🛝');
   });
 
-  it('sends what is in the box with every way of starting', () => {
-    const { part, dispatch, type } = setup();
-    part('pick-shoes').click();
-    part('preset-5').click();
-    type('custom-minutes', '10');
-    part('custom-start').click();
-    type('until-time', '09:30');
-    part('until-start').click();
-    expect(dispatch.mock.calls).toEqual([
-      [{ type: 'start', durationMs: 300_000, label: '👟🚗' }],
-      [{ type: 'start', durationMs: 600_000, label: '👟🚗' }],
-      [{ type: 'start', durationMs: 1_800_000, label: '👟🚗' }],
-    ]);
+  it.each(START_WAYS)('starts from $how with what is in the box, then empties it', (way) => {
+    const harness = setup();
+    harness.part('pick-shoes').click();
+    way.begin(harness);
+    const expected = { type: 'start', durationMs: way.durationMs, label: '👟🚗' };
+    expect(harness.dispatch).toHaveBeenCalledExactlyOnceWith(expected);
+    expect(harness.part<HTMLInputElement>('label-input').value).toBe('');
   });
 
   it('sends an empty label when the box is empty', () => {
@@ -204,26 +224,35 @@ describe('createSetupView: What for?', () => {
     expect(dispatch).toHaveBeenCalledExactlyOnceWith(expected);
   });
 
-  it('keeps the box when the start screen is redrawn with no timer', () => {
-    const { view, part, type } = setup();
+  it('keeps the box when the minutes are refused', () => {
+    const { part, dispatch, type } = setup();
     type('label-input', '👟');
-    view.update(stateWith(null), 0);
+    type('custom-minutes', '0');
+    part('custom-start').click();
+    expect(dispatch).not.toHaveBeenCalled();
     expect(part<HTMLInputElement>('label-input').value).toBe('👟');
   });
 
-  it('empties the box once a timer is running', () => {
-    const { view, part, type } = setup();
+  it('keeps the box when the time is missing or too soon', () => {
+    const { part, dispatch, type } = setup(FORTY_SECONDS_TO_HALF_PAST);
     type('label-input', '👟');
-    view.update(stateWith(startTimer(300_000, 0)), 0);
-    expect(part<HTMLInputElement>('label-input').value).toBe('');
+    part('until-start').click();
+    type('until-time', '09:30');
+    part('until-start').click();
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(part<HTMLInputElement>('label-input').value).toBe('👟');
   });
 
-  it('empties the box when the start screen comes back into view', () => {
+  it('keeps the box on every redraw: no timer, a running timer, or the screen hidden', () => {
     const { view, part, type } = setup();
+    const box = part<HTMLInputElement>('label-input');
     type('label-input', '👟');
-    // The shell hides the start screen while a timer runs, and redraws it just before showing it.
+    view.update(stateWith(null), 0);
+    expect(box.value).toBe('👟');
+    view.update(stateWith(startTimer(300_000, 0)), 0);
+    expect(box.value).toBe('👟');
     view.el.hidden = true;
     view.update(stateWith(null), 0);
-    expect(part<HTMLInputElement>('label-input').value).toBe('');
+    expect(box.value).toBe('👟');
   });
 });

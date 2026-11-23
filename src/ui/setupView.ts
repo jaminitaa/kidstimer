@@ -172,8 +172,12 @@ export function createSetupView(dispatch: Dispatch, clock: () => Date): View {
   applyStage(root, 'calm');
   const inner = make('div', 'setup-inner');
   const what = whatFor();
-  const start: Start = (durationMs) =>
+  // Every duration is checked before this is called, so the start is never refused: the box
+  // can be emptied now, ready for the next time the start screen shows.
+  const start: Start = (durationMs) => {
     dispatch({ type: 'start', durationMs, label: what.box.value });
+    what.box.value = '';
+  };
   const direction = directions(dispatch);
   const changeCode = button('btn-link', 'change-code', 'Change code', () =>
     dispatch({ type: 'begin-change-code' }),
@@ -190,11 +194,6 @@ export function createSetupView(dispatch: Dispatch, clock: () => Date): View {
   return {
     el: root,
     update(state: AppState): void {
-      // The shell redraws only the screen on show, and a hidden one just before it shows again.
-      // So a redraw while hidden means the start screen is coming back (after a timer): the last
-      // emojis must not label the next timer. While the parent is on this screen, the box stays.
-      const startingOver = state.timer !== null || root.hidden;
-      if (startingOver && what.box.value !== '') what.box.value = '';
       for (const [value, el] of direction.buttons) {
         const pressed = String(state.settings.ringDirection === value);
         if (el.getAttribute('aria-pressed') !== pressed) el.setAttribute('aria-pressed', pressed);
