@@ -52,7 +52,7 @@ export function contrastRatio(hexA: string, hexB: string): number {
   return (Math.max(a, b) + FLARE) / (Math.min(a, b) + FLARE);
 }
 
-/** Marks `el` with the stage and sets the --stage-* color variables styles.css reads. */
+/** Marks `el` with the stage and sets the --stage-* color variables the stylesheets read. */
 export function applyStage(el: HTMLElement, stage: Stage): void {
   const { bg, ring, track, digits } = STAGE_COLORS[stage];
   el.dataset.stage = stage;

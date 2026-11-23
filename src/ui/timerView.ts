@@ -10,7 +10,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const TIMES_UP_TEXT = "Time's up!";
 
 // Ring geometry in SVG user units. The viewBox is scaled to the ring's diameter, so the
-// stroke is 8% of it. styles.css sizes the digits to fit inside the stroke's inner edge.
+// stroke is 8% of it. styles/timer.css sizes the digits to fit inside the stroke's inner edge.
 const VIEWBOX_SIZE = 100;
 const RING_STROKE = 8;
 const RING_CENTER = VIEWBOX_SIZE / 2;

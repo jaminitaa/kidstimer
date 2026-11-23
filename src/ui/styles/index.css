@@ -1,0 +1,10 @@
+/*
+ * Kids Timer styles, one file per screen. Keep this order: later files override
+ * earlier ones (lock.css resizes the timer ring while an overlay is open).
+ * Timer-screen colors come from src/ui/theme.ts as the --stage-* variables.
+ */
+@import './base.css';
+@import './timer.css';
+@import './setup.css';
+@import './keypad.css';
+@import './lock.css';

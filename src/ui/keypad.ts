@@ -1,6 +1,6 @@
 import { PASSCODE_LENGTH } from '../core/constants';
 
-// Phone keypad order. The 0 sits in the middle of the last row (styles.css places it).
+// Phone keypad order. The 0 sits in the middle of the last row (styles/keypad.css places it).
 const DIGIT_ROWS: readonly (readonly string[])[] = [
   ['1', '2', '3'],
   ['4', '5', '6'],
@@ -21,7 +21,8 @@ function key(testId: string, className: string, label: string): HTMLButtonElemen
 /**
  * The unlabeled passcode keypad. Digit keys are plain circles: the children can read
  * digits, so nothing on a key says which one it is (the aria-label is for screen readers
- * only). styles.css gives them no pressed, hover or focus look; the dots are the only feedback.
+ * only). styles/keypad.css gives them no pressed, hover or focus look; the dots are the only
+ * feedback.
  */
 export function createKeypad(
   onDigit: (digit: string) => void,

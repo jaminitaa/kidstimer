@@ -21,7 +21,7 @@ function control(testId: string, text: string, onClick: () => void): HTMLButtonE
 
 /**
  * The lock: the passcode keypad overlay and, after the right code, the parent controls.
- * Both sit in a panel at the bottom of the screen; styles.css shrinks the ring above it
+ * Both sit in a panel at the bottom of the screen; styles/lock.css shrinks the ring above it
  * while #app[data-overlay] is set. The keypad gives no hint of which key was pressed.
  */
 export function createLockView(dispatch: (action: Action) => void): View {

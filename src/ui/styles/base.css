@@ -1,0 +1,29 @@
+/* ---------- Base ---------- */
+
+:root {
+  --font-rounded: ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
+  --stage-fade: 1.5s;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-rounded);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* The hidden attribute always wins over a display rule. */
+[hidden] {
+  display: none !important;
+}
