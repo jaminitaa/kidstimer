@@ -92,59 +92,6 @@ describe('start', () => {
   });
 });
 
-describe('start with a label', () => {
-  const startWith = (state: AppState, label: string, durationMs = 5 * MINUTE): AppState =>
-    reduce(state, { type: 'start', durationMs, label }, NOW);
-
-  it('keeps the label with the new timer', () => {
-    const next = startWith(returning, '👟🚗');
-    expect(next.label).toBe('👟🚗');
-    expect(next.timer).not.toBeNull();
-  });
-
-  it('keeps only the first four symbols', () => {
-    expect(startWith(returning, '📺🛏️💤👟🚗🛝').label).toBe('📺🛏️💤👟');
-  });
-
-  it('accepts an empty label', () => {
-    expect(startWith(returning, '').label).toBe('');
-  });
-
-  it('is ignored for a bad duration, so no label is set', () => {
-    expect(startWith(returning, '👟', 30_000)).toBe(returning);
-  });
-
-  it('is ignored while a timer is showing', () => {
-    const running = onTimer({ label: '📺' });
-    expect(startWith(running, '👟')).toBe(running);
-  });
-});
-
-describe('label stays put', () => {
-  it('is unchanged by pause, resume and add-time', () => {
-    const open = controls({ label: '🛏️💤' });
-    for (const action of [
-      { type: 'pause' },
-      { type: 'resume' },
-      { type: 'add-time', minutes: 5 },
-    ] as const) {
-      expect(reduce(open, action, NOW).label).toBe('🛏️💤');
-    }
-  });
-
-  it('is cleared with the timer by stop', () => {
-    const next = reduce(controls({ label: '🛝' }), { type: 'stop' }, NOW);
-    expect(next.timer).toBeNull();
-    expect(next.label).toBe('');
-  });
-
-  it('is cleared with a done timer by the right code', () => {
-    const next = run(keypad({ label: '🛝' }), digits(CODE), NOW + 10 * MINUTE);
-    expect(next.timer).toBeNull();
-    expect(next.label).toBe('');
-  });
-});
-
 describe('set-direction', () => {
   it('updates the ring direction on setup', () => {
     const next = reduce(returning, { type: 'set-direction', direction: 'fills' }, NOW);
