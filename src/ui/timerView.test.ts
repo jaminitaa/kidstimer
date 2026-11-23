@@ -10,7 +10,7 @@ import { createTimerView } from './timerView';
 const FIFTEEN_MIN = 900_000;
 
 function stateWith(timer: Timer | null, ringDirection: RingDirection = 'empties'): AppState {
-  return initialState({ settings: { ringDirection, passcode: '2580' }, timer });
+  return initialState({ settings: { ringDirection, passcode: '2580' }, timer, label: '' });
 }
 
 function setup() {

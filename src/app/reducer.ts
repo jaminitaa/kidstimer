@@ -6,6 +6,7 @@ import {
   MS_PER_MINUTE,
   PASSCODE_LENGTH,
 } from '../core/constants';
+import { clampLabel } from '../core/label';
 import { appendDigit, checkPasscode, deleteDigit, isLockedOut } from '../core/passcode';
 import { addTime, isDone, pauseTimer, resumeTimer, startTimer, type Timer } from '../core/timer';
 import { screenFor, type Action, type AppState } from './state';
@@ -23,11 +24,11 @@ const closed = (state: AppState, changes: Partial<AppState>): AppState => ({
   entry: '',
 });
 
-const onStart: Handler<'start'> = (state, { durationMs }, now) => {
+const onStart: Handler<'start'> = (state, { durationMs, label }, now) => {
   const valid =
     Number.isFinite(durationMs) && durationMs >= MIN_TIMER_MS && durationMs <= MAX_TIMER_MS;
   if (screenFor(state) !== 'setup' || !valid) return state;
-  return { ...state, timer: startTimer(durationMs, now) };
+  return { ...state, timer: startTimer(durationMs, now), label: clampLabel(label) };
 };
 
 const onSetDirection: Handler<'set-direction'> = (state, { direction }) =>
@@ -47,7 +48,7 @@ function submitKeypad(state: AppState, entry: string, now: number): AppState {
   if (passcode === null || state.timer === null) return state;
   const { lock, outcome } = checkPasscode(state.lock, entry, passcode, now);
   if (outcome === 'wrong') return closed(state, { lock });
-  if (isDone(state.timer, now)) return closed(state, { lock, timer: null });
+  if (isDone(state.timer, now)) return closed(state, { lock, timer: null, label: '' });
   return { ...state, lock, overlay: 'controls', entry: '', overlayTouchedAt: now };
 }
 
@@ -95,7 +96,7 @@ const onAddTime: Handler<'add-time'> = (state, { minutes }, now) => {
 };
 
 const onStop: Handler<'stop'> = (state) =>
-  state.overlay === 'controls' ? closed(state, { timer: null }) : state;
+  state.overlay === 'controls' ? closed(state, { timer: null, label: '' }) : state;
 
 const onBeginChangeCode: Handler<'begin-change-code'> = (state) =>
   screenFor(state) === 'setup' && state.settings.passcode !== null

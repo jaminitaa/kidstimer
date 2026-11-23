@@ -22,7 +22,7 @@ const PAUSED: Timer = { status: 'paused', totalMs: TOTAL_MS, remainingMs: 120_00
 
 function stateWith(timer: Timer | null, changes: Partial<AppState> = {}): AppState {
   const settings = { ringDirection: 'empties', passcode: '2580' } as const;
-  return { ...initialState({ settings, timer }), ...changes };
+  return { ...initialState({ settings, timer, label: '' }), ...changes };
 }
 
 describe('snapshotOf', () => {

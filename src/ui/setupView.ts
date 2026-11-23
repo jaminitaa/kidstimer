@@ -53,7 +53,7 @@ function presets(dispatch: Dispatch): HTMLElement {
   const grid = make('div', 'preset-grid');
   for (const minutes of PRESET_MINUTES) {
     const label = `${minutes} min`;
-    const start = () => dispatch({ type: 'start', durationMs: minutes * MS_PER_MINUTE });
+    const start = () => dispatch({ type: 'start', durationMs: minutes * MS_PER_MINUTE, label: '' });
     grid.append(button('btn btn-preset', `preset-${minutes}`, label, start));
   }
   return grid;
@@ -73,7 +73,7 @@ function customMinutes(dispatch: Dispatch): HTMLElement {
       error.textContent = result.message;
       return;
     }
-    dispatch({ type: 'start', durationMs: result.minutes * MS_PER_MINUTE });
+    dispatch({ type: 'start', durationMs: result.minutes * MS_PER_MINUTE, label: '' });
   };
   input.addEventListener('input', () => (error.textContent = ''));
   input.addEventListener('keydown', (event) => {
@@ -102,7 +102,7 @@ function untilTime(dispatch: Dispatch, clock: () => Date): HTMLElement {
       error.textContent = TOO_SOON_MESSAGE;
       return;
     }
-    dispatch({ type: 'start', durationMs });
+    dispatch({ type: 'start', durationMs, label: '' });
   };
   input.addEventListener('input', () => (error.textContent = ''));
   const row = make('div', 'setup-row');

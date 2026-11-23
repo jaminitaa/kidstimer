@@ -10,6 +10,8 @@ export type Overlay = 'none' | 'keypad' | 'controls';
 export type AppState = {
   readonly settings: Settings;
   readonly timer: Timer | null;
+  /** Up to four symbols shown under the countdown; '' when there is none. */
+  readonly label: string;
   readonly overlay: Overlay;
   /** Keypad digits typed so far. */
   readonly entry: string;
@@ -19,7 +21,7 @@ export type AppState = {
 };
 
 export type Action =
-  | { readonly type: 'start'; readonly durationMs: number }
+  | { readonly type: 'start'; readonly durationMs: number; readonly label: string }
   | { readonly type: 'set-direction'; readonly direction: RingDirection }
   | { readonly type: 'open-keypad' }
   | { readonly type: 'digit'; readonly digit: string }
@@ -33,17 +35,23 @@ export type Action =
   | { readonly type: 'cancel-code-flow' };
 
 export type Screen = 'code' | 'setup' | 'timer';
-export type Persisted = { readonly settings: Settings; readonly timer: Timer | null };
+export type Persisted = {
+  readonly settings: Settings;
+  readonly timer: Timer | null;
+  readonly label: string;
+};
 
 export const DEFAULT_PERSISTED: Persisted = {
   settings: { ringDirection: 'empties', passcode: null },
   timer: null,
+  label: '',
 };
 
 export function initialState(persisted: Persisted): AppState {
   return {
     settings: persisted.settings,
     timer: persisted.timer,
+    label: persisted.label,
     overlay: 'none',
     entry: '',
     lock: INITIAL_LOCK,

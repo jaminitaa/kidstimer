@@ -1,4 +1,5 @@
 import { MAX_TIMER_MS, STORAGE_KEY } from '../core/constants';
+import { isValidLabel } from '../core/label';
 import { isValidPasscode } from '../core/passcode';
 import type { Timer } from '../core/timer';
 import { DEFAULT_PERSISTED, type AppState, type Persisted, type Settings } from './state';
@@ -37,6 +38,10 @@ function parseTimer(value: unknown): Timer | null {
   return null;
 }
 
+/** A saved label is kept only with a restored timer and only when it is a valid label. */
+const parseLabel = (value: unknown, timer: Timer | null): string =>
+  timer !== null && isValidLabel(value) ? value : '';
+
 /** Reads saved data. Each part is judged on its own; it never throws. */
 export function parsePersisted(raw: string | null): Persisted {
   if (raw === null) return DEFAULT_PERSISTED;
@@ -48,12 +53,13 @@ export function parsePersisted(raw: string | null): Persisted {
     return DEFAULT_PERSISTED;
   }
   if (!isRecord(data)) return DEFAULT_PERSISTED;
-  return { settings: parseSettings(data.settings), timer: parseTimer(data.timer) };
+  const timer = parseTimer(data.timer);
+  return { settings: parseSettings(data.settings), timer, label: parseLabel(data.label, timer) };
 }
 
-/** Only settings and the timer are saved; keypad, lock and overlay are never stored. */
+/** Only settings, the timer and its label are saved; keypad, lock and overlay are never stored. */
 export function serializeState(state: AppState): string {
-  return JSON.stringify({ settings: state.settings, timer: state.timer });
+  return JSON.stringify({ settings: state.settings, timer: state.timer, label: state.label });
 }
 
 /** Keeps data for this visit only; nothing survives closing the app. */

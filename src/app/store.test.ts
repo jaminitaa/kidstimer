@@ -6,8 +6,9 @@ import { createStore } from './store';
 const returning = initialState({
   settings: { ringDirection: 'empties', passcode: '2580' },
   timer: null,
+  label: '',
 });
-const START: Action = { type: 'start', durationMs: 300_000 };
+const START: Action = { type: 'start', durationMs: 300_000, label: '' };
 
 describe('createStore', () => {
   it('runs the reducer with the current time', () => {

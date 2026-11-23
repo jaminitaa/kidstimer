@@ -38,7 +38,7 @@ describe('createSetupView', () => {
   ])('starts a %i-minute timer from its preset', (minutes, durationMs) => {
     const { part, dispatch } = setup();
     part(`preset-${minutes}`).click();
-    expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'start', durationMs });
+    expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'start', durationMs, label: '' });
   });
 
   it('starts a custom timer from the button and from Enter', () => {
@@ -47,8 +47,8 @@ describe('createSetupView', () => {
     part('custom-start').click();
     part('custom-minutes').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
     expect(dispatch).toHaveBeenCalledTimes(2);
-    expect(dispatch).toHaveBeenNthCalledWith(1, { type: 'start', durationMs: 1_200_000 });
-    expect(dispatch).toHaveBeenNthCalledWith(2, { type: 'start', durationMs: 1_200_000 });
+    expect(dispatch).toHaveBeenNthCalledWith(1, { type: 'start', durationMs: 1_200_000, label: '' });
+    expect(dispatch).toHaveBeenNthCalledWith(2, { type: 'start', durationMs: 1_200_000, label: '' });
   });
 
   it('rejects bad custom minutes with a message that clears on the next input', () => {
@@ -65,7 +65,7 @@ describe('createSetupView', () => {
     const { part, dispatch, type } = setup();
     type('until-time', '09:30');
     part('until-start').click();
-    expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'start', durationMs: 1_800_000 });
+    expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'start', durationMs: 1_800_000, label: '' });
   });
 
   it('refuses a time less than a minute away, with a message that clears on the next input', () => {
@@ -82,7 +82,7 @@ describe('createSetupView', () => {
     const { part, dispatch, type } = setup(ONE_MINUTE_TO_HALF_PAST);
     type('until-time', '09:30');
     part('until-start').click();
-    expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'start', durationMs: 60_000 });
+    expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'start', durationMs: 60_000, label: '' });
     expect(part('until-error').textContent).toBe('');
   });
 
@@ -100,7 +100,7 @@ describe('createSetupView', () => {
     part('direction-fills').click();
     expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'set-direction', direction: 'fills' });
     const show = (ringDirection: RingDirection) =>
-      view.update(initialState({ settings: { ringDirection, passcode: '2580' }, timer: null }), 0);
+      view.update(initialState({ settings: { ringDirection, passcode: '2580' }, timer: null, label: '' }), 0);
     show('fills');
     expect(part('direction-fills').getAttribute('aria-pressed')).toBe('true');
     expect(part('direction-empties').getAttribute('aria-pressed')).toBe('false');

@@ -12,6 +12,7 @@ function stateWith(opts: { overlay?: Overlay; timer?: Timer | null; code?: boole
   const base = initialState({
     settings: { ringDirection: 'empties', passcode: '2580' },
     timer: opts.timer === undefined ? RUNNING : opts.timer,
+    label: '',
   });
   return { ...base, overlay: opts.overlay ?? 'none', codeFlow: opts.code ? beginCreate() : null };
 }
