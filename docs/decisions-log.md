@@ -102,3 +102,13 @@ Decisions made *before* approval are in the design
     - Situation: a reviewer noted that closing and reopening the app clears the wait.
     - Chose: leave it that way.
     - Why: a young child cannot close and reopen a full-screen home-screen app to dodge it, and the code itself (1 in 10,000) is the real protection. Reversible if the kids prove craftier.
+
+19. **The four stage colors.**
+    - Situation: the design left the exact colors to the builder: colorful and playful, cool while there is plenty of time, warmer near the end, celebratory at zero, and digits readable across a room.
+    - Chose: bright backgrounds with very dark digits. Sky blue while calm, sunny orange at 5 minutes, coral red at 1 minute, party purple at "Time's up!". The ring is a deep shade of the same color, and the part of the ring already used up is a pale shade.
+    - Why: dark numbers on a bright color read best from across a room, and only a bright background keeps orange looking orange (white numbers would need it so dark it turns brown). Every stage passes the strictest common readability standard for its digits (7 to 1 or better). Coral rather than siren red, so the last minute feels urgent without being alarming. Purple follows coral naturally, so the change at zero fades through pink instead of a muddy brown.
+
+20. **How big the digits are, and where "Time's up!" goes.**
+    - Situation: the digits must always sit inside the ring, from `05:00` to `1440:00`, on a phone, a tablet and the TV.
+    - Chose: a thick, round-ended ring, with digits sized as a share of the ring that steps down for 6 and 7 characters, leaving a margin for fonts with wider numbers. "Time's up!" appears in smaller letters under the digits, inside the ring.
+    - Why: checked in Chrome at phone, tablet and TV sizes, and against the Safari font's measurements; the digits use at most about 86% of the room inside the ring. The digits stay exactly centered, so nothing jumps when the timer ends.
