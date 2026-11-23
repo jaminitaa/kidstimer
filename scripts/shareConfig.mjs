@@ -14,11 +14,20 @@ function failure(detail) {
   };
 }
 
+/**
+ * The bare host name from what was typed or pasted: no spaces, no http(s)://, no trailing
+ * slash. vite.config.ts uses it too, so the preview server allows exactly the host ngrok uses.
+ * @param {string} value
+ */
+export function normalizeDomain(value) {
+  return value.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+}
+
 /** @param {Record<string, string | undefined>} env */
 export function readShareConfig(env) {
   const raw = env[ENV_NAME];
   if (raw === undefined) return failure(`${ENV_NAME} is not set.`);
-  const domain = raw.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+  const domain = normalizeDomain(raw);
   if (domain === '' || !HOSTNAME.test(domain)) {
     return failure(`"${raw}" is not a valid domain.`);
   }

@@ -33,8 +33,14 @@ if (!onPath('ngrok')) fail('ngrok is not installed. Install it with: brew instal
 const build = spawnSync(VITE, ['build'], { stdio: 'inherit' });
 if (build.status !== 0) fail('The build failed, so nothing was shared.');
 
+// The preview server allows only this host name, so give it the cleaned one ngrok will use.
+const previewEnv = { ...process.env, KIDSTIMER_NGROK_DOMAIN: config.domain };
+
 const children = [
-  spawn(VITE, ['preview', '--port', String(config.port), '--strictPort'], { stdio: 'inherit' }),
+  spawn(VITE, ['preview', '--port', String(config.port), '--strictPort'], {
+    stdio: 'inherit',
+    env: previewEnv,
+  }),
   spawn('ngrok', ['http', String(config.port), `--url=${config.domain}`], { stdio: 'inherit' }),
 ];
 

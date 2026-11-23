@@ -1,13 +1,16 @@
 import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { VitePWA } from 'vite-plugin-pwa';
+import { normalizeDomain } from './scripts/shareConfig.mjs';
 
 // Same as STAGE_COLORS.calm.bg in src/ui/theme.ts (the config cannot import app code).
 const CALM_BACKGROUND = '#6cc4fb';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'KIDSTIMER_');
-  const domain = env['KIDSTIMER_NGROK_DOMAIN']?.trim();
+  const raw = env['KIDSTIMER_NGROK_DOMAIN'];
+  // Cleaned the same way as in `npm run share`, so a pasted https://…/ address still works.
+  const domain = raw === undefined ? '' : normalizeDomain(raw);
 
   return {
     preview: {
