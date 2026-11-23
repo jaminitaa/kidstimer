@@ -4,7 +4,7 @@ import { registerSW } from 'virtual:pwa-register';
 import { createTicker, shouldReloadForUpdate, soundName } from './app/effects';
 import { mountShell, showStartupError } from './app/shell';
 import { initialState, type AppState } from './app/state';
-import { createStorage } from './app/storage';
+import { createStorage, deviceStorage } from './app/storage';
 import { createStore } from './app/store';
 import { TICK_MS } from './core/constants';
 import type { SoundEffect } from './core/tick';
@@ -33,7 +33,7 @@ function listenForSoundUnlock(unlock: () => Promise<unknown>, render: () => void
 
 /** Builds and runs the app. Returns how to read its state. */
 function start(root: HTMLElement): () => AppState {
-  const storage = createStorage(localStorage);
+  const storage = createStorage(deviceStorage(() => window.localStorage));
   const store = createStore(initialState(storage.load()), Date.now);
   const { dispatch, getState } = store;
   const sound = createSound(() => new AudioContext());
@@ -90,21 +90,36 @@ function onNewVersion(getState: () => AppState): void {
   console.info('A new version is ready. It will show the next time the timer is opened.');
 }
 
-/** Saves the app on the device so it opens with no network. Built app only, never `npm run dev`. */
+/**
+ * Saves the app on the device so it opens with no network. Built app only, never `npm run dev`.
+ * A failure here only costs offline use, so it never replaces a working timer with the error page.
+ */
 function registerOffline(getState: () => AppState): void {
   if (!import.meta.env.PROD) return;
-  registerSW({
-    immediate: true,
-    onNeedReload: () => onNewVersion(getState),
-    onRegisterError: (error) => console.warn('Offline use could not be set up.', error),
-  });
+  const warn = (error: unknown): void => console.warn('Offline use could not be set up.', error);
+  try {
+    registerSW({
+      immediate: true,
+      onNeedReload: () => onNewVersion(getState),
+      onRegisterError: warn,
+    });
+  } catch (error) {
+    warn(error);
+  }
 }
 
-const root = document.getElementById('app');
-try {
-  if (root === null) throw new Error('The page has no #app element.');
-  registerOffline(start(root));
-} catch (error) {
-  console.error('The timer could not start.', error);
-  showStartupError(root ?? document.body);
+/** Starts the app, or shows the start-up error page if it cannot. Returns null on failure. */
+function boot(): (() => AppState) | null {
+  const root = document.getElementById('app');
+  try {
+    if (root === null) throw new Error('The page has no #app element.');
+    return start(root);
+  } catch (error) {
+    console.error('The timer could not start.', error);
+    showStartupError(root ?? document.body);
+    return null;
+  }
 }
+
+const getState = boot();
+if (getState !== null) registerOffline(getState);

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MAX_TIMER_MS, STORAGE_KEY } from '../core/constants';
 import { startTimer, type Timer } from '../core/timer';
-import { createStorage, parsePersisted, serializeState } from './storage';
+import { createStorage, deviceStorage, parsePersisted, serializeState } from './storage';
 import { DEFAULT_PERSISTED, initialState, type AppState } from './state';
 
 const settings = { ringDirection: 'fills', passcode: '2580' } as const;
@@ -95,6 +95,31 @@ describe('serializeState', () => {
     for (const word of ['entry', 'lock', 'overlay']) {
       expect(text).not.toContain(word);
     }
+  });
+});
+
+describe('deviceStorage', () => {
+  it("uses the browser's storage when it can be reached", () => {
+    const warn = vi.spyOn(console, 'warn');
+    const browser = { getItem: () => null, setItem: () => undefined };
+    expect(deviceStorage(() => browser)).toBe(browser);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('falls back to memory for this visit, warning once, when the browser blocks storage', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const backend = deviceStorage(() => {
+      throw new DOMException('The operation is insecure.', 'SecurityError');
+    });
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(backend.getItem(STORAGE_KEY)).toBeNull();
+
+    const storage = createStorage(backend);
+    expect(storage.load()).toEqual(DEFAULT_PERSISTED);
+    const state: AppState = { ...initialState({ settings, timer: null }), timer: paused };
+    storage.save(state);
+    expect(storage.load()).toEqual({ settings, timer: paused });
+    expect(warn).toHaveBeenCalledTimes(1);
   });
 });
 

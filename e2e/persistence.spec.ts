@@ -94,3 +94,26 @@ test('corrupt saved data starts fresh on the first-run code screen', async ({ pa
   // Not silent: the console says why the device was started fresh.
   expect(warnings.some((text) => text.includes('not valid JSON'))).toBe(true);
 });
+
+test('with saved data blocked by the browser, the timer still works for the visit', async ({
+  page,
+}) => {
+  const warnings: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'warning') warnings.push(message.text());
+  });
+  // As with "Block all cookies": merely reading localStorage throws.
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      get() {
+        throw new DOMException('The operation is insecure.', 'SecurityError');
+      },
+    });
+  });
+  await readyApp(page);
+  await page.getByTestId('preset-5').click();
+  await expect(digits(page)).toHaveText('05:00');
+  await expect(page.locator('.startup-error')).toHaveCount(0);
+  expect(warnings.some((text) => text.includes('blocks saved data'))).toBe(true);
+});

@@ -56,6 +56,29 @@ export function serializeState(state: AppState): string {
   return JSON.stringify({ settings: state.settings, timer: state.timer });
 }
 
+/** Keeps data for this visit only; nothing survives closing the app. */
+function memoryBackend(): StorageBackend {
+  const items = new Map<string, string>();
+  return {
+    getItem: (key) => items.get(key) ?? null,
+    setItem: (key, value) => void items.set(key, value),
+  };
+}
+
+/**
+ * The browser's storage, read through `read` (for example `() => window.localStorage`).
+ * With all site data blocked, merely reading it throws; then the timer still works for
+ * this visit, keeping its data in memory, and says so once in the console.
+ */
+export function deviceStorage(read: () => StorageBackend): StorageBackend {
+  try {
+    return read();
+  } catch (error) {
+    console.warn('This browser blocks saved data; the timer will forget everything when closed.', error);
+    return memoryBackend();
+  }
+}
+
 export function createStorage(backend: StorageBackend): {
   load(): Persisted;
   save(state: AppState): void;
