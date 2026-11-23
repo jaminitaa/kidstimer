@@ -122,6 +122,7 @@ The automatic tests cannot check these. Tick them on the real devices. After eac
 - [ ] iPhone: the bells can be heard with the silent switch on and with it off. Working: a 2-minute timer rings at 1 minute left both ways (if not with the switch on, you know to flip it to ring).
 - [ ] iPhone and iPad: after a phone call or switching apps, "tap for sound" appears and one tap brings sound back. Working: the note goes away and the next bell is heard.
 - [ ] iPhone and iPad: press and hold for 2 seconds opens the keypad. Working: the keypad appears after about 2 seconds, and quick taps do nothing.
+- [ ] iPhone and iPad: the keypad's circles answer to taps, and pinching does not zoom. Working: a dot fills for each tap, the right code opens the controls, each control button works, and pinching the keypad or the controls changes nothing.
 - [ ] iPhone: the keypad is comfortable one-handed. Working: holding the phone in one hand, upright and sideways, your thumb reaches every key.
 - [ ] MacBook: `npm start` opens at `http://localhost:4173`, and the keyboard works. Working: holding Space for 2 seconds opens the keypad, and typing the code opens the controls.
 - [ ] MacBook mirrored to the TV: the dings come out of the TV. Working: the ring and digits fit the TV screen, and the 1-minute bell is heard from the TV.

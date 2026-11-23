@@ -176,3 +176,22 @@ Decisions made *before* approval are in the design
       - The time left can never show more than the timer was set for, even if the device clock is set back.
       - One browser test (reopening onto a running timer, then checking the screen stays awake) failed about one run in six in Safari's engine. The app was fine: the test's own watcher was sometimes thrown away by the browser while tidying memory. The watcher now hooks in where it cannot be lost, and the test passed 40 times in a row in each browser.
     - Why: each change closes a way the timer could appear broken or be fiddled with, without adding any control to the timer screen. The message for "until a time" matches the style of entry 13. The 700-pixel line leaves a safe margin above the height the single column needs.
+
+32. **Things the final review raised that were left as they are.**
+    - Situation: the final review listed some points it would not judge, because they are a matter of taste or of how the family uses the timer.
+    - Chose: leave each of these alone.
+      - During the 30-second wait after three wrong codes, press-and-hold shows nothing at all: no message, no countdown. A parent who mistyped three times sees a timer that seems to ignore them for half a minute.
+      - The app accepts any 4-digit code, including easy ones like 1111. The README advises against them.
+      - On the iPhone and iPad, iOS still draws its own small clock (hours and minutes) at the very top of the screen. A web app cannot remove it.
+      - A child can still swipe out of the timer on the iPhone or iPad. A web app cannot stop that; the README suggests iOS Guided Access.
+      - On the MacBook, two browser windows open on the timer at once will overwrite each other's timer.
+      - At the MacBook keyboard, Reload and Command-W work as in any browser page.
+      - If Resume is pressed within a quarter of a second of a bell mark (say at exactly 5:00), that one bell can be skipped.
+      - The share command still prints "Open this address…" a moment before ngrok is ready. The README tells you to wait for ngrok's own `Forwarding` line.
+      - Safari on a Mac may forget the code after about a week unused. This was not tested; the README says to set it again or use Chrome.
+    - Why: the design says nothing may show on the timer screen until the hold completes, and that each device runs one timer. The kids watch the TV, not the laptop keyboard. The rest are either out of a web app's reach or too rare to be worth more moving parts. Any of them can be revisited.
+
+33. **How the last round of checks was run.**
+    - Situation: after the final review, one round of fixes was made and then checked once more by a separate reviewer. The helper making the fixes stalled while repeating its own last full test run, on a Mac that was very busy with other work at the time.
+    - Chose: start the second check as soon as all the fixes were saved, stop the stalled helper, and run the full set of tests directly: 303 rule checks and 111 browser journeys, all passing. One line was then added to the device checklist (the keypad's circles on a real iPhone and iPad), which no reviewer read after it was written.
+    - Why: every fix was already saved and the reviewer read exactly those. Waiting on the stalled run would have added nothing.
