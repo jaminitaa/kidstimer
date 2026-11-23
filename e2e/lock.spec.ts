@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   appRoot,
   CODE,
@@ -28,6 +28,15 @@ async function expectLocked(page: Page): Promise<void> {
   await expect(appRoot(page)).toHaveAttribute('data-overlay', 'none');
   await expect(keypadOverlay(page)).toBeHidden();
   await expect(controls(page)).toBeHidden();
+}
+
+/** The touch-action of an element and of every panel and button inside it. */
+function touchActions(part: Locator): Promise<readonly string[]> {
+  return part.evaluate((root) =>
+    [root, ...root.querySelectorAll('section, button')].map(
+      (el) => getComputedStyle(el).touchAction,
+    ),
+  );
 }
 
 /** Clicks spread over the whole screen: corners, edges, the ring and the digits. */
@@ -83,6 +92,23 @@ test('hold opens a keypad with blank keys; the right code opens the controls', a
   await expect(controls(page)).toBeVisible();
   await expect(keypadOverlay(page)).toBeHidden();
   await expect(appRoot(page)).toHaveAttribute('data-overlay', 'controls');
+});
+
+test('nothing on the lock can be pinch-zoomed; setup buttons still allow it', async ({
+  page,
+}) => {
+  await readyApp(page);
+  expect(await touchActions(setupScreen(page).getByTestId('preset-5'))).toEqual(['manipulation']);
+  await page.getByTestId('preset-15').click();
+  await holdToOpen(page);
+  await expect(keypadOverlay(page)).toBeVisible();
+  // The wrapper, both panels, every key and every control.
+  const actions = await touchActions(page.getByTestId('lock'));
+  expect(actions.length).toBeGreaterThan(10);
+  expect(new Set(actions)).toEqual(new Set(['none']));
+  // Taps still work.
+  await enterCode(page, CODE);
+  await expect(controls(page)).toBeVisible();
 });
 
 test('pause freezes the digits; resume continues', async ({ page }) => {
