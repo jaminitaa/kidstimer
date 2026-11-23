@@ -147,3 +147,13 @@ Decisions made *before* approval are in the design
     - Situation: the plan names `npm start` for the MacBook but not exactly what it does.
     - Chose: it builds the app and then serves it on port 4173, and refuses to start if that port is taken.
     - Why: the same address every time, so the MacBook's saved copy and the ngrok copy are never confused with a different port.
+
+28. **A tap now also asks again to keep the screen awake.**
+    - Situation: the browser tests in Safari's engine showed that Safari will not keep the screen awake for a page nobody has touched yet. When the timer is reopened onto a running timer, it asks straight away and is refused, and it used to ask again only the next time the app came back to the front.
+    - Chose: after a refusal, the next tap or key press anywhere asks again, as well as the app coming back to the front. The one tap that turns sound back on ("tap for sound") now also keeps the screen awake.
+    - Why: otherwise a phone reopened onto a running timer could lock itself partway through, and a locked phone plays no bells. The device checklist asks you to confirm it on the iPhone.
+
+29. **How the browser tests are set up.**
+    - Situation: the plan lists the journeys to test, but not how the tests control time, which copy of the app the "no network" test uses, or how the test servers start.
+    - Chose: the tests use a pretend clock that stops at a fixed moment once the app has loaded, in a fixed time zone (UTC), so "one second later" and "until 09:30" mean exactly the same on every run and every computer. After moving the clock on, they let one more screen frame (16 thousandths of a second) pass before reading the digits, as a real screen would. The "no network" test runs only in Chrome, as a separate group with its own server: it builds the finished app and serves it on port 4174, because only the finished app saves itself for offline use; it uses the real clock. The test servers are always started fresh: if port 5173 or 4174 is already busy, the run stops instead of testing whatever is there. Headless Chrome is told it may keep the screen awake, as real browsers do.
+    - Why: tests that give the same answer every time, a "no network" test of the same copy that ends up on the phone, and no chance of quietly testing a different copy of the code left running in another folder.

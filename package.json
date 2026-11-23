@@ -10,11 +10,13 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "start": "vite build && vite preview --port 4173 --strictPort",
     "share": "node scripts/share.mjs",
     "icons": "pwa-assets-generator"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@vite-pwa/assets-generator": "^2.0.0",
     "@vitest/coverage-v8": "^5.1.1",
     "jsdom": "^31.0.1",

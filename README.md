@@ -89,22 +89,33 @@ You do this once per device. After that the MacBook can be off, and the timer wo
 - **"Port 4173 is already in use"**: another copy is still running. Press Control + C in its Terminal window, or restart the MacBook.
 - **The address shows a blocked-host error**: the domain in `.env.local` is different from the one ngrok is using. Make them match, then run `npm run share` again.
 
+## Running the tests
+
+You do not need the tests to use the timer. They are there to catch mistakes when something is changed. Run them in the Terminal, in this folder.
+
+1. `npm test` checks the timer's rules. It takes a few seconds.
+2. `npm run test:coverage` runs the same checks and says how much of the timer they cover. It fails if any part is under 80%.
+3. `npm run test:e2e` opens the timer in two browsers, Chrome and Safari's engine (standing in for the iPhone and iPad), and uses it the way a parent would: setting the code, starting timers, the lock, reloading, phone and TV screen sizes, and opening with no network. It takes about a minute.
+   - The first time, download the two test browsers with `npx playwright install chromium webkit`.
+   - It needs ports 5173 and 4174 free. If `npm run dev` is running, stop it first (Control + C).
+   - If a check fails, it prints which one and why.
+
 ## Choices made for you
 
 While building, some decisions were made on your behalf where the plan did not say. They are listed in plain language in `docs/decisions-log.md`.
 
 ## Device checklist
 
-Tick these on the real devices. A few more checks will be added at the end of the build.
+The automatic tests cannot check these. Tick them on the real devices. After each one is what "working" looks like.
 
-- [ ] iPhone: opened once through the ngrok address, then added to the Home Screen.
-- [ ] iPhone: with Wi-Fi and mobile data off, the home screen app opens and a timer runs.
-- [ ] iPad: opened once through the ngrok address, then added to the Home Screen.
-- [ ] iPad: with Wi-Fi off, the home screen app opens and a timer runs.
-- [ ] iPhone and iPad: the app opens full screen, with no browser bars.
-- [ ] iPhone and iPad: the screen stays on while a timer runs.
-- [ ] iPhone: the bells are heard with the silent switch on, or you know to flip it to ring.
-- [ ] iPhone and iPad: after a phone call or switching apps, "tap for sound" appears and one tap brings sound back.
-- [ ] iPhone and iPad: press and hold for 2 seconds opens the keypad.
-- [ ] MacBook: `npm start` opens at `http://localhost:4173`, and the code can be typed on the keyboard.
-- [ ] MacBook mirrored to the TV: the ring and digits fit the screen, and sound comes out of the TV.
+- [ ] iPhone and iPad: the ngrok address opens in Safari. Working: the timer's "Choose a 4-digit code" screen appears.
+- [ ] iPhone and iPad: ngrok's warning page, if it shows, does not stop the app. Working: after tapping through it, the timer appears, not an error or a blank page.
+- [ ] iPhone and iPad: Add to Home Screen works and the app opens full screen. Working: a blue ring icon on the home screen, and no Safari address bar or buttons when it opens.
+- [ ] iPhone and iPad: with the MacBook off and the device in airplane mode, the home screen app still opens and runs a timer. Working: a 5-minute timer starts and counts down.
+- [ ] iPhone and iPad: the screen stays awake for a 10-minute timer. Working: the screen never dims or locks before "Time's up!". Try it once more after closing and reopening the app mid-timer and tapping once.
+- [ ] iPhone: the bells can be heard with the silent switch on and with it off. Working: a 2-minute timer rings at 1 minute left both ways (if not with the switch on, you know to flip it to ring).
+- [ ] iPhone and iPad: after a phone call or switching apps, "tap for sound" appears and one tap brings sound back. Working: the note goes away and the next bell is heard.
+- [ ] iPhone and iPad: press and hold for 2 seconds opens the keypad. Working: the keypad appears after about 2 seconds, and quick taps do nothing.
+- [ ] iPhone: the keypad is comfortable one-handed. Working: holding the phone in one hand, upright and sideways, your thumb reaches every key.
+- [ ] MacBook: `npm start` opens at `http://localhost:4173`, and the keyboard works. Working: holding Space for 2 seconds opens the keypad, and typing the code opens the controls.
+- [ ] MacBook mirrored to the TV: the dings come out of the TV. Working: the ring and digits fit the TV screen, and the 1-minute bell is heard from the TV.
