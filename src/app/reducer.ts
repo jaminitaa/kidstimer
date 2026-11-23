@@ -2,7 +2,7 @@ import { beginChange, codeFlowDelete, codeFlowDigit } from '../core/codeFlow';
 import {
   ADD_TIME_MINUTES,
   MAX_TIMER_MS,
-  MIN_TIMER_MINUTES,
+  MIN_TIMER_MS,
   MS_PER_MINUTE,
   PASSCODE_LENGTH,
 } from '../core/constants';
@@ -16,8 +16,6 @@ type Handler<T extends Action['type']> = (
   now: number,
 ) => AppState;
 
-const MIN_START_MS = MIN_TIMER_MINUTES * MS_PER_MINUTE;
-
 const closed = (state: AppState, changes: Partial<AppState>): AppState => ({
   ...state,
   ...changes,
@@ -27,7 +25,7 @@ const closed = (state: AppState, changes: Partial<AppState>): AppState => ({
 
 const onStart: Handler<'start'> = (state, { durationMs }, now) => {
   const valid =
-    Number.isFinite(durationMs) && durationMs >= MIN_START_MS && durationMs <= MAX_TIMER_MS;
+    Number.isFinite(durationMs) && durationMs >= MIN_TIMER_MS && durationMs <= MAX_TIMER_MS;
   if (screenFor(state) !== 'setup' || !valid) return state;
   return { ...state, timer: startTimer(durationMs, now) };
 };

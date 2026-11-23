@@ -5,10 +5,12 @@ import type { RingDirection } from '../core/ring';
 import { createSetupView } from './setupView';
 
 const NINE_AM = new Date(2026, 10, 22, 9, 0, 0, 0);
+const FORTY_SECONDS_TO_HALF_PAST = new Date(2026, 10, 22, 9, 29, 20, 0);
+const ONE_MINUTE_TO_HALF_PAST = new Date(2026, 10, 22, 9, 29, 0, 0);
 
-function setup() {
+function setup(now: Date = NINE_AM) {
   const dispatch = vi.fn();
-  const view = createSetupView(dispatch, () => NINE_AM);
+  const view = createSetupView(dispatch, () => now);
   const part = <T extends HTMLElement>(id: string) =>
     view.el.querySelector(`[data-testid="${id}"]`) as T;
   const type = (id: string, value: string) => {
@@ -64,6 +66,24 @@ describe('createSetupView', () => {
     type('until-time', '09:30');
     part('until-start').click();
     expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'start', durationMs: 1_800_000 });
+  });
+
+  it('refuses a time less than a minute away, with a message that clears on the next input', () => {
+    const { part, dispatch, type } = setup(FORTY_SECONDS_TO_HALF_PAST);
+    type('until-time', '09:30');
+    part('until-start').click();
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(part('until-error').textContent).toBe("That's less than a minute away.");
+    type('until-time', '09:45');
+    expect(part('until-error').textContent).toBe('');
+  });
+
+  it('starts a timer for a time exactly one minute away', () => {
+    const { part, dispatch, type } = setup(ONE_MINUTE_TO_HALF_PAST);
+    type('until-time', '09:30');
+    part('until-start').click();
+    expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'start', durationMs: 60_000 });
+    expect(part('until-error').textContent).toBe('');
   });
 
   it('asks for a time when none is chosen, and clears the message on input', () => {

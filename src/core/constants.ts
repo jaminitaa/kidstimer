@@ -4,6 +4,7 @@ export const MARK_MINUTES = [15, 10, 5, 3, 1] as const;
 export const PRESET_MINUTES = [5, 10, 15, 30] as const;
 export const ADD_TIME_MINUTES = [1, 5] as const;
 export const MIN_TIMER_MINUTES = 1;
+export const MIN_TIMER_MS = MIN_TIMER_MINUTES * MS_PER_MINUTE;
 export const MAX_TIMER_MINUTES = 1440;
 export const MAX_TIMER_MS = MAX_TIMER_MINUTES * MS_PER_MINUTE;
 export const WARM_AT_MS = 5 * MS_PER_MINUTE;

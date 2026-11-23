@@ -1,5 +1,5 @@
 import type { Action, AppState } from '../app/state';
-import { MS_PER_MINUTE, PRESET_MINUTES } from '../core/constants';
+import { MIN_TIMER_MS, MS_PER_MINUTE, PRESET_MINUTES } from '../core/constants';
 import type { RingDirection } from '../core/ring';
 import { parseCustomMinutes } from '../core/validate';
 import { msUntil, parseTimeValue } from '../core/untilTime';
@@ -7,6 +7,8 @@ import { applyStage } from './theme';
 import type { View } from './view';
 
 const PICK_TIME_MESSAGE = 'Pick a time first.';
+// The shortest timer is one minute, so a time sooner than that cannot start one.
+const TOO_SOON_MESSAGE = "That's less than a minute away.";
 const DIRECTIONS: readonly { readonly value: RingDirection; readonly label: string }[] = [
   { value: 'empties', label: 'Empties' },
   { value: 'fills', label: 'Fills up' },
@@ -95,7 +97,12 @@ function untilTime(dispatch: Dispatch, clock: () => Date): HTMLElement {
       error.textContent = PICK_TIME_MESSAGE;
       return;
     }
-    dispatch({ type: 'start', durationMs: msUntil(target, clock()) });
+    const durationMs = msUntil(target, clock());
+    if (durationMs < MIN_TIMER_MS) {
+      error.textContent = TOO_SOON_MESSAGE;
+      return;
+    }
+    dispatch({ type: 'start', durationMs });
   };
   input.addEventListener('input', () => (error.textContent = ''));
   const row = make('div', 'setup-row');

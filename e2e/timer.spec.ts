@@ -93,6 +93,15 @@ test('until a time counts down to that clock time', async ({ page }) => {
   await expect(digits(page)).toHaveText('19:30');
 });
 
+test('until a time less than a minute away: refused with a message', async ({ page }) => {
+  await readyApp(page, '2026-11-23T09:29:20Z');
+  await page.getByTestId('until-time').fill('09:30');
+  await page.getByTestId('until-start').click();
+  await expect(page.getByTestId('until-error')).toHaveText("That's less than a minute away.");
+  await expect(setupScreen(page)).toBeVisible();
+  await expect(timerScreen(page)).toBeHidden();
+});
+
 test('a long timer shows minutes only, never hours', async ({ page }) => {
   await readyApp(page, '2026-11-23T09:00:00Z');
   await page.getByTestId('until-time').fill('17:00');
