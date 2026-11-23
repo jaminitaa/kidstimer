@@ -74,7 +74,10 @@ export function deviceStorage(read: () => StorageBackend): StorageBackend {
   try {
     return read();
   } catch (error) {
-    console.warn('This browser blocks saved data; the timer will forget everything when closed.', error);
+    console.warn(
+      'This browser blocks saved data; the timer will forget everything when closed.',
+      error,
+    );
     return memoryBackend();
   }
 }
