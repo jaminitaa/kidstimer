@@ -1,5 +1,6 @@
 // Wiring only: every rule lives in a tested module. This file is left out of unit coverage.
 import './ui/styles/index.css';
+import { registerSW } from 'virtual:pwa-register';
 import { createTicker, soundName } from './app/effects';
 import { mountShell, showStartupError } from './app/shell';
 import { initialState } from './app/state';
@@ -75,10 +76,20 @@ function start(root: HTMLElement): void {
   }
 }
 
+/** Saves the app on the device so it opens with no network. Built app only, never `npm run dev`. */
+function registerOffline(): void {
+  if (!import.meta.env.PROD) return;
+  registerSW({
+    immediate: true,
+    onRegisterError: (error) => console.warn('Offline use could not be set up.', error),
+  });
+}
+
 const root = document.getElementById('app');
 try {
   if (root === null) throw new Error('The page has no #app element.');
   start(root);
+  registerOffline();
 } catch (error) {
   console.error('The timer could not start.', error);
   showStartupError(root ?? document.body);

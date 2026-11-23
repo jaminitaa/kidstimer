@@ -137,3 +137,13 @@ Decisions made *before* approval are in the design
     - Situation: the plan lists the files for this step, but not where "which screen is showing" gets decided, or what to do when a device refuses to keep the screen on.
     - Chose: the screen switching lives in its own small file with its own tests (`src/app/shell.ts`), so the start-up file stays short. If a device refuses to keep the screen awake, the app writes one warning and asks again the next time the timer comes back to the front, instead of asking over and over.
     - Why: the start-up file is the one part the automatic tests do not cover, so anything that can go wrong belongs elsewhere. Asking four times a second would flood the console without helping.
+
+26. **How the timer saves itself for offline use, and its icon.**
+    - Situation: the plan says to make the app installable and work with no network, but not how updates reach a device, or what the icon looks like.
+    - Chose: the saved copy updates itself when the app is opened while online, with no button or question (the app may reload once by itself when a new version arrives). The icon is a thick blue ring on the same sky-blue as the calm screen, drawn once as a picture file and turned into the sizes each device needs (the home screen and "maskable" versions have a little extra blue around the ring so nothing is cut off by rounded corners). The offline copy is only built for the finished app, never when the app is being worked on.
+    - Why: a parent should never have to answer an "update?" prompt, and the timer keeps its place when a page reloads (entry about saved state), so an update that reloads the app once will not lose a running timer. The calm color matches what the kids see when the timer starts.
+
+27. **The `npm start` command.**
+    - Situation: the plan names `npm start` for the MacBook but not exactly what it does.
+    - Chose: it builds the app and then serves it on port 4173, and refuses to start if that port is taken.
+    - Why: the same address every time, so the MacBook's saved copy and the ngrok copy are never confused with a different port.
