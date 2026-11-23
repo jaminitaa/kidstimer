@@ -176,3 +176,49 @@
   color: var(--stage-digits);
   cursor: pointer;
 }
+
+/*
+ * A short landscape screen (a phone held sideways) has no room for the stacked column,
+ * which needs about 650px of height. Lay it out like the lock panel instead: title, dots,
+ * message and Cancel on the left, the keypad on the right with the lock's key size.
+ */
+@media (min-aspect-ratio: 1/1) and (max-height: 700px) {
+  .code-screen {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 1fr repeat(4, auto) 1fr;
+    grid-template-areas:
+      '. keypad'
+      'title keypad'
+      'dots keypad'
+      'error keypad'
+      'cancel keypad'
+      '. keypad';
+    justify-items: center;
+    align-items: center;
+    column-gap: calc(2 * var(--lock-pad));
+    row-gap: 16px;
+  }
+
+  .code-title {
+    grid-area: title;
+  }
+
+  .code-screen .dots {
+    grid-area: dots;
+  }
+
+  .code-error {
+    grid-area: error;
+  }
+
+  .code-screen .keypad {
+    --key-size: var(--lock-key);
+    grid-area: keypad;
+    gap: var(--lock-gap);
+  }
+
+  .code-cancel {
+    grid-area: cancel;
+  }
+}

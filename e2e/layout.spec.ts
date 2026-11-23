@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   CODE,
+  codeScreen,
   controls,
   digits,
   enterCode,
@@ -31,6 +32,13 @@ type Geometry = {
 };
 type Target = { readonly name: string; readonly width: number; readonly height: number };
 type Reading = { readonly text: string; readonly start: (page: Page) => Promise<void> };
+type Part = { readonly name: string; readonly box: Box };
+type CodeScreenLayout = {
+  readonly viewport: Size;
+  readonly page: Size;
+  readonly screen: { readonly scrollHeight: number; readonly clientHeight: number };
+  readonly parts: readonly Part[];
+};
 
 const PHONE_PORTRAIT: Size = { width: 393, height: 852 };
 const PHONE_LANDSCAPE: Size = { width: 852, height: 393 };
@@ -42,6 +50,13 @@ const LAPTOP: Size = { width: 1280, height: 800 };
 const MIN_TARGET_PX = 44;
 /** Allowance for sub-pixel rounding in layout. */
 const EPSILON = 0.5;
+
+/** Every key of the code screen's keypad: ten digits and delete. */
+const KEY_IDS: readonly string[] = [...'0123456789'].map((digit) => `key-${digit}`).concat('key-delete');
+/** The parts of the code screen that must always be fully on screen (Cancel only when shown). */
+const CODE_PARTS: readonly string[] = ['code-title', 'dots', 'code-error', ...KEY_IDS];
+/** Not the code each journey sets, so the change-code screen shows its error line. */
+const WRONG_CODE = '1357';
 
 const sizeName = ({ width, height }: Size): string => `${width}x${height}`;
 
@@ -167,6 +182,44 @@ async function expectComfortableScreen(page: Page, screenTestId: string): Promis
   expect(small, `targets under ${MIN_TARGET_PX} px`).toEqual([]);
 }
 
+/** Where the title, dots, error line, keys and Cancel (when shown) of the code screen are. */
+function measureCodeScreen(page: Page): Promise<CodeScreenLayout> {
+  return page.evaluate((ids) => {
+    const screen = document.querySelector('[data-testid="code-screen"]');
+    if (screen === null) throw new Error('No code-screen on the page.');
+    const doc = document.documentElement;
+    const selector = ids.map((id) => `[data-testid="${id}"]`).join(', ');
+    const parts = [...screen.querySelectorAll<HTMLElement>(selector)]
+      .filter((el) => el.getClientRects().length > 0)
+      .map((el) => {
+        const { left, top, right, bottom } = el.getBoundingClientRect();
+        return { name: el.dataset['testid'] ?? el.tagName, box: { left, top, right, bottom } };
+      });
+    return {
+      viewport: { width: doc.clientWidth, height: doc.clientHeight },
+      page: { width: doc.scrollWidth, height: doc.scrollHeight },
+      screen: { scrollHeight: screen.scrollHeight, clientHeight: screen.clientHeight },
+      parts,
+    };
+  }, [...CODE_PARTS, 'code-cancel']);
+}
+
+/** Each expected part is showing and wholly on screen, nothing scrolls, and no key is small. */
+async function expectWholeCodeScreen(page: Page, expected: readonly string[]): Promise<void> {
+  const layout = await measureCodeScreen(page);
+  expect(layout.parts.map((p) => p.name).sort(), 'parts showing').toEqual([...expected].sort());
+  for (const part of layout.parts) expectInViewport(part.box, layout.viewport, part.name);
+  expect(layout.page.height, 'the page scrolls').toBeLessThanOrEqual(layout.viewport.height);
+  expect(layout.screen.scrollHeight, 'the screen cuts something off').toBeLessThanOrEqual(
+    layout.screen.clientHeight,
+  );
+  const small = layout.parts
+    .filter((p) => p.name.startsWith('key-'))
+    .filter((p) => p.box.right - p.box.left < MIN_TARGET_PX || p.box.bottom - p.box.top < MIN_TARGET_PX)
+    .map((p) => p.name);
+  expect(small, `keys under ${MIN_TARGET_PX} px`).toEqual([]);
+}
+
 for (const viewport of [PHONE_PORTRAIT, PHONE_LANDSCAPE, TABLET, TV]) {
   test.describe(`timer screen at ${sizeName(viewport)}`, () => {
     test.use({ viewport });
@@ -204,7 +257,33 @@ for (const viewport of [PHONE_PORTRAIT, PHONE_LANDSCAPE, TV]) {
   });
 }
 
-for (const viewport of [PHONE_PORTRAIT, LAPTOP]) {
+for (const viewport of [PHONE_PORTRAIT, PHONE_LANDSCAPE, TABLET, LAPTOP]) {
+  test.describe(`code screen at ${sizeName(viewport)}`, () => {
+    test.use({ viewport });
+
+    test('first run: title, dots and every key fully on screen, nothing scrolls', async ({
+      page,
+    }) => {
+      await freshApp(page, MORNING);
+      await expect(codeScreen(page).getByTestId('code-title')).toHaveText('Choose a 4-digit code');
+      await expectWholeCodeScreen(page, CODE_PARTS);
+    });
+
+    test('change code, with its message: every part and Cancel fully on screen', async ({
+      page,
+    }) => {
+      await readyApp(page);
+      await page.getByTestId('change-code').click();
+      const screen = codeScreen(page);
+      await expect(screen.getByTestId('code-title')).toHaveText('Enter your current code');
+      for (const digit of WRONG_CODE) await screen.getByTestId(`key-${digit}`).click();
+      await expect(screen.getByTestId('code-error')).toHaveText("That's not the current code.");
+      await expectWholeCodeScreen(page, [...CODE_PARTS, 'code-cancel']);
+    });
+  });
+}
+
+for (const viewport of [PHONE_PORTRAIT, PHONE_LANDSCAPE, LAPTOP]) {
   test.describe(`setup and code screens at ${sizeName(viewport)}`, () => {
     test.use({ viewport });
 
