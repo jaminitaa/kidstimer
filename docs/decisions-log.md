@@ -91,7 +91,7 @@ Decisions made *before* approval are in the design
 16. **Changing the code does not count wrong guesses toward the 30-second wait.**
     - Situation: the change-code screen asks for the current code, and the plan only gives the lock rules to the main keypad.
     - Chose: a wrong current code just shows "That's not the current code." and starts that step over.
-    - Why: the screen is only reachable after the parent already opened the controls with the code, so a second lock adds nothing.
+    - Why: "Change code" is on the setup screen, and the setup screen only shows when no timer exists: before one is started, or after a grown-up with the code stopped or cleared it. Someone who can reach it could just as well start, stop or set timers, so a second lock there protects nothing. (Corrected in the final review: an earlier version said the screen was only reachable after opening the controls with the code, which is not true.)
 
 17. **Deleting a keypad digit counts as touching the keypad, and unreadable saved data is reported.**
     - Situation: the plan says typing a digit restarts the 10-second idle wait, but says nothing about the delete key or about saved data that cannot be read.
@@ -140,8 +140,8 @@ Decisions made *before* approval are in the design
 
 26. **How the timer saves itself for offline use, and its icon.**
     - Situation: the plan says to make the app installable and work with no network, but not how updates reach a device, or what the icon looks like.
-    - Chose: the saved copy updates itself when the app is opened while online, with no button or question (the app may reload once by itself when a new version arrives). The icon is a thick blue ring on the same sky-blue as the calm screen, drawn once as a picture file and turned into the sizes each device needs (the home screen and "maskable" versions have a little extra blue around the ring so nothing is cut off by rounded corners). The offline copy is only built for the finished app, never when the app is being worked on.
-    - Why: a parent should never have to answer an "update?" prompt, and the timer keeps its place when a page reloads (entry about saved state), so an update that reloads the app once will not lose a running timer. The calm color matches what the kids see when the timer starts.
+    - Chose: the saved copy updates itself when the app is opened while online, with no button or question. When a new version arrives, the app reloads once by itself only if there is no timer; if a timer exists (running, paused or finished), nothing happens and the new version shows the next time the app is opened. The icon is a thick blue ring on the same sky-blue as the calm screen, drawn once as a picture file and turned into the sizes each device needs (the home screen and "maskable" versions have a little extra blue around the ring so nothing is cut off by rounded corners). The offline copy is only built for the finished app, never when the app is being worked on.
+    - Why: a parent should never have to answer an "update?" prompt. A reload keeps the timer's place, but it turns the sound off again until someone taps, and Safari stops keeping the screen awake, so with a timer on screen the update waits for the next open. The calm color matches what the kids see when the timer starts.
 
 27. **The `npm start` command.**
     - Situation: the plan names `npm start` for the MacBook but not exactly what it does.
@@ -157,3 +157,21 @@ Decisions made *before* approval are in the design
     - Situation: the plan lists the journeys to test, but not how the tests control time, which copy of the app the "no network" test uses, or how the test servers start.
     - Chose: the tests use a pretend clock that stops at a fixed moment once the app has loaded, in a fixed time zone (UTC), so "one second later" and "until 09:30" mean exactly the same on every run and every computer. After moving the clock on, they let one more screen frame (16 thousandths of a second) pass before reading the digits, as a real screen would. The "no network" test runs only in Chrome, as a separate group with its own server: it builds the finished app and serves it on port 4174, because only the finished app saves itself for offline use; it uses the real clock. The test servers are always started fresh: if port 5173 or 4174 is already busy, the run stops instead of testing whatever is there. Headless Chrome is told it may keep the screen awake, as real browsers do.
     - Why: tests that give the same answer every time, a "no network" test of the same copy that ends up on the phone, and no chance of quietly testing a different copy of the code left running in another folder.
+
+30. **Two details of the browser-test journeys.**
+    - Situation: the plan lists the journeys to test, but two of them could be read more than one way.
+    - Chose: the pause-and-resume journey opens the controls a second time (hold, then the code) before pressing Resume, because the controls close by themselves 10 seconds after Pause. The custom-minutes journey tries 0 first (refused) and then 90 (starts).
+    - Why: pressing Resume without reopening would contradict the 10-second rule in the design. Trying 0 before 90 makes the same two checks without having to stop a timer in between.
+
+31. **Changes from the final review.**
+    - Situation: the final review found three faults and a few weak spots. The fixes needed some new behavior and wording the plan did not give.
+    - Chose:
+      - "Until a time" less than a minute away (for example 09:30 chosen at 09:29:20) does not start and says "That's less than a minute away." Exactly one minute away starts a 1-minute timer. Before, Start silently did nothing.
+      - An app update reloads the page by itself only when there is no timer; otherwise it shows the next time the app is opened (entry 26).
+      - The keypad and the controls can no longer be pinch-zoomed. Taps work as before. The setup and code screens can still be zoomed, because they can also be zoomed back out.
+      - If a finger's lift or a key's release is lost (a phone call, the app switcher, Command-Tab), the press-and-hold forgets it when the app goes into the background or loses focus, and any hold in progress is cancelled. Before, the keypad could stop opening until the app was restarted. Coming back to the app does not cancel anything.
+      - A key held down on the MacBook types its digit once, not over and over.
+      - On a phone held sideways (or any landscape screen 700 pixels tall or less), the code screen is laid out like the lock panel: title, dots, message and Cancel on the left, keypad on the right. Taller screens (the iPad, the MacBook, the TV) keep the single column, which needs about 650 pixels.
+      - If the browser blocks saved data entirely, the timer still works but forgets everything when closed, and says so once in the console.
+      - The time left can never show more than the timer was set for, even if the device clock is set back.
+    - Why: each change closes a way the timer could appear broken or be fiddled with, without adding any control to the timer screen. The message for "until a time" matches the style of entry 13. The 700-pixel line leaves a safe margin above the height the single column needs.
