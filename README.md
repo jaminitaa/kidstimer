@@ -129,7 +129,7 @@ The automatic tests cannot check these. Tick them on the real devices. After eac
 - [ ] iPhone: the keypad is comfortable one-handed. Working: holding the phone in one hand, upright and sideways, your thumb reaches every key.
 - [ ] MacBook: `npm start` opens at `http://localhost:4173`, and the keyboard works. Working: holding Space for 2 seconds opens the keypad, and typing the code opens the controls.
 - [ ] MacBook mirrored to the TV: the dings come out of the TV. Working: the ring and digits fit the TV screen, and the 1-minute bell is heard from the TV.
-- [ ] iPhone, iPad and MacBook: the four ready-made sets show as pictures. Working: the TV, the bed and zzz, the shoes and car, and the slide all appear as small pictures, not empty boxes.
+- [ ] iPhone, iPad and MacBook: the four ready-made sets show as pictures. Working: the TV, the bed and zzz, the shoes and car, and the slide all appear as small pictures, not empty boxes, and none is cut off at its edges once the timer is running.
 - [ ] MacBook mirrored to the TV: the emojis can be read from across the room. Working: with an emoji set chosen, you can tell which one it is from the sofa.
 - [ ] iPhone: with four emojis and at "Time's up!", the emoji line and "Time's up!" sit inside the ring without touching it. Working: there is a visible gap between them and the ring all the way round (the automatic check passes with only a small margin on a phone-sized screen, and real phones can draw emojis slightly larger).
 - [ ] iPhone: tap the What for box, type an emoji, then tap a preset while the keyboard is still showing, upright and sideways. Working: the timer starts with the emoji and the keyboard goes away.

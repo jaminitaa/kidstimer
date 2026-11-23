@@ -257,3 +257,15 @@ choices are tagged "(my call)". Nothing below was ruled by the owner.
     - Situation: the final review found small problems, none serious.
     - Chose: (a) on a browser too old to count emojis properly, the app still opens and counts the line by character instead, so a family emoji could count as several; (b) a symbol far wider or taller than an emoji is cut off at an emoji-sized box, so the line can never leave the ring or draw over the time; (c) the "What for" box no longer capitalises or autocorrects what is typed.
     - Why: (a) a blank page is far worse than a miscounted line; (b) the ring is the edge of the design, and the four ready-made sets, a family and a flag all fit in the box with room to spare; (c) the box is for emojis, and an iPhone changing the letters would only get in the way.
+
+45. **Things the final review raised that were left as they are.**
+    - Situation: the final review found nothing serious. It listed some points it would not judge, because they are a matter of taste or of how the timer is used.
+    - Chose: leave each of these alone.
+      - On a phone held sideways, the "What for?" section pushes the minutes box and the "until a time" box below the first screen. The four preset buttons are still on it.
+      - A ready-made set cannot be taken back with one tap: there is no "none" button, and tapping the same set again does not empty the box. Deleting it needs the keyboard.
+      - Emojis left in the box stay there until a timer starts, however long that is. They are in plain view at the top of the start screen.
+      - The box takes anything typed, including letters. Writing that runs right to left, or whose letters join up, will not read properly in the line, and an invisible character uses up one of the four places.
+      - A screen reader reads each emoji in the line but gives the line no name of its own.
+      - Each emoji is drawn inside a box only a little wider than Safari draws an emoji (about 4% to spare), so that an odd, very wide symbol cannot push the line out of the ring. If a real iPhone drew emojis wider than the test browser does, their edges would be shaved. The device checklist asks you to look.
+    - Why: the design puts "What for?" first, says a ready-made set replaces the box, and says the line is for emojis, not words. The rest are rare, or cannot be judged without a real device. Any of them can be revisited.
+    - One line was added to the device checklist after the last check (that no emoji is cut off at its edges), so no reviewer read that line.
