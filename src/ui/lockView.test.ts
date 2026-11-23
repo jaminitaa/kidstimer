@@ -8,7 +8,7 @@ const RUNNING: Timer = { status: 'running', totalMs: 600_000, endsAt: 500_000 };
 const PAUSED: Timer = { status: 'paused', totalMs: 600_000, remainingMs: 300_000 };
 
 function stateWith(overlay: Overlay, timer: Timer | null = RUNNING, entry = ''): AppState {
-  const base = initialState({ settings: { ringDirection: 'empties', passcode: '2580' }, timer });
+  const base = initialState({ settings: { ringDirection: 'empties', passcode: '2580' }, timer, label: '' });
   return { ...base, overlay, entry };
 }
 

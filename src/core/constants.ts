@@ -18,3 +18,14 @@ export const TICK_MS = 250;
 export const STALE_TICK_MS = 2000;
 export const STORAGE_KEY = 'kidstimer.v1';
 export const PREVIEW_PORT = 4173;
+export const MAX_LABEL_SYMBOLS = 4;
+export const QUICK_PICKS: readonly {
+  readonly id: string;
+  readonly name: string;
+  readonly label: string;
+}[] = [
+  { id: 'tv', name: 'TV', label: '\u{1F4FA}' },
+  { id: 'bed', name: 'Bed and zzz', label: '\u{1F6CF}\u{FE0F}\u{1F4A4}' },
+  { id: 'shoes', name: 'Shoes and car', label: '\u{1F45F}\u{1F697}' },
+  { id: 'slide', name: 'Slide', label: '\u{1F6DD}' },
+];

@@ -26,12 +26,13 @@ describe('parsePersisted', () => {
 
   it('judges settings and timer separately', () => {
     const badTimer = { status: 'running', totalMs: 600000, endsAt: null };
-    expect(parsePersisted(raw({ settings, timer: badTimer }))).toEqual({ settings, timer: null });
+    expect(parsePersisted(raw({ settings, timer: badTimer }))).toEqual({ settings, timer: null, label: '' });
     const badSettings = { ringDirection: 'sideways', passcode: '25' };
     expect(parsePersisted(raw({ settings: badSettings, timer: null }))).toEqual(DEFAULT_PERSISTED);
     expect(parsePersisted(raw({ settings: badSettings, timer: running }))).toEqual({
       settings: DEFAULT_PERSISTED.settings,
       timer: running,
+      label: '',
     });
   });
 
@@ -74,16 +75,16 @@ describe('parsePersisted', () => {
 });
 
 describe('serializeState', () => {
-  const base = initialState({ settings, timer: null });
+  const base = initialState({ settings, timer: null, label: '' });
 
   it('round-trips a running and a paused timer', () => {
     for (const timer of [running, paused]) {
       const state: AppState = { ...base, timer };
-      expect(parsePersisted(serializeState(state))).toEqual({ settings, timer });
+      expect(parsePersisted(serializeState(state))).toEqual({ settings, timer, label: '' });
     }
   });
 
-  it('saves settings and timer only', () => {
+  it('saves settings, timer and label only', () => {
     const state: AppState = {
       ...base,
       timer: startTimer(600_000, 1),
@@ -91,10 +92,48 @@ describe('serializeState', () => {
       entry: '12',
     };
     const text = serializeState(state);
-    expect(Object.keys(JSON.parse(text)).sort()).toEqual(['settings', 'timer']);
+    expect(Object.keys(JSON.parse(text)).sort()).toEqual(['label', 'settings', 'timer']);
     for (const word of ['entry', 'lock', 'overlay']) {
       expect(text).not.toContain(word);
     }
+  });
+});
+
+describe('label in saved data', () => {
+  const base = initialState({ settings, timer: null, label: '' });
+  const withLabel = (label: unknown, timer: unknown = running): string =>
+    raw({ settings, timer, label });
+
+  it('is written by serializeState', () => {
+    const state: AppState = { ...base, timer: running, label: '👟🚗' };
+    expect(JSON.parse(serializeState(state)).label).toBe('👟🚗');
+  });
+
+  it('round-trips with a running timer', () => {
+    const state: AppState = { ...base, timer: running, label: '🛏️💤' };
+    const result = parsePersisted(serializeState(state));
+    expect(result.timer).toEqual(running);
+    expect(result.label).toBe('🛏️💤');
+  });
+
+  it('loads old data with no label as an empty label, keeping the timer', () => {
+    const result = parsePersisted(raw({ settings, timer: running }));
+    expect(result.timer).toEqual(running);
+    expect(result.label).toBe('');
+  });
+
+  it.each([[42], ['📺🛏️💤👟🚗'], ['👟 🚗']])('drops a bad label %j but keeps the timer', (label) => {
+    const result = parsePersisted(withLabel(label));
+    expect(result.timer).toEqual(running);
+    expect(result.label).toBe('');
+  });
+
+  it('drops a label when there is no timer', () => {
+    expect(parsePersisted(withLabel('👟', null)).label).toBe('');
+  });
+
+  it('is empty for missing saved data', () => {
+    expect(parsePersisted(null).label).toBe('');
   });
 });
 
@@ -116,9 +155,9 @@ describe('deviceStorage', () => {
 
     const storage = createStorage(backend);
     expect(storage.load()).toEqual(DEFAULT_PERSISTED);
-    const state: AppState = { ...initialState({ settings, timer: null }), timer: paused };
+    const state: AppState = { ...initialState({ settings, timer: null, label: '' }), timer: paused };
     storage.save(state);
-    expect(storage.load()).toEqual({ settings, timer: paused });
+    expect(storage.load()).toEqual({ settings, timer: paused, label: '' });
     expect(warn).toHaveBeenCalledTimes(1);
   });
 });
@@ -130,10 +169,10 @@ describe('createStorage', () => {
       getItem: (key) => data.get(key) ?? null,
       setItem: (key, value) => void data.set(key, value),
     });
-    const state: AppState = { ...initialState({ settings, timer: null }), timer: paused };
+    const state: AppState = { ...initialState({ settings, timer: null, label: '' }), timer: paused };
     storage.save(state);
     expect(data.has(STORAGE_KEY)).toBe(true);
-    expect(storage.load()).toEqual({ settings, timer: paused });
+    expect(storage.load()).toEqual({ settings, timer: paused, label: '' });
   });
 
   it('returns defaults and warns once when reading throws', () => {

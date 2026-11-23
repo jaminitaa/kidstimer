@@ -5,7 +5,7 @@ import { beginChange, beginCreate, type CodeFlow } from '../core/codeFlow';
 import { createCodeView } from './codeView';
 
 function stateWith(codeFlow: CodeFlow | null, passcode: string | null = null): AppState {
-  const base = initialState({ settings: { ringDirection: 'empties', passcode }, timer: null });
+  const base = initialState({ settings: { ringDirection: 'empties', passcode }, timer: null, label: '' });
   return { ...base, codeFlow };
 }
 

@@ -10,7 +10,11 @@ import { createTimerView } from './timerView';
 const FIFTEEN_MIN = 900_000;
 
 function stateWith(timer: Timer | null, ringDirection: RingDirection = 'empties'): AppState {
-  return initialState({ settings: { ringDirection, passcode: '2580' }, timer });
+  return initialState({ settings: { ringDirection, passcode: '2580' }, timer, label: '' });
+}
+
+function labelled(label: string, timer: Timer = startTimer(FIFTEEN_MIN, 0)): AppState {
+  return { ...stateWith(timer), label };
 }
 
 function setup() {
@@ -22,6 +26,8 @@ function setup() {
   };
   const digits = part('digits') as HTMLElement;
   const timesUp = part('times-up') as HTMLElement;
+  /** Looked up when asked, so a missing line fails only the tests about it. */
+  const label = (): HTMLElement => part('timer-label') as HTMLElement;
   const arc = part('ring-arc');
   const track = part('ring-track');
   const circumference = 2 * Math.PI * Number(arc.getAttribute('r'));
@@ -29,7 +35,7 @@ function setup() {
     dasharray: arc.getAttribute('stroke-dasharray'),
     dashoffset: Number(arc.getAttribute('stroke-dashoffset')),
   });
-  return { view, digits, timesUp, arc, track, circumference, dash };
+  return { view, digits, timesUp, label, arc, track, circumference, dash };
 }
 
 describe('createTimerView', () => {
@@ -127,5 +133,56 @@ describe('createTimerView', () => {
   it('does not throw without a timer', () => {
     const { view } = setup();
     expect(() => view.update(stateWith(null), 0)).not.toThrow();
+  });
+});
+
+describe('createTimerView: the line under the time', () => {
+  it('is there but hidden when the label is empty', () => {
+    const { view, label } = setup();
+    view.update(labelled(''), 0);
+    expect(view.el.contains(label())).toBe(true);
+    expect(label().hidden).toBe(true);
+  });
+
+  it('shows each symbol of the label in its own element', () => {
+    const { view, label } = setup();
+    view.update(labelled('👟🚗'), 0);
+    expect(label().hidden).toBe(false);
+    expect(label().textContent).toBe('👟🚗');
+    expect(label().children.length).toBe(2);
+  });
+
+  it('shows markup as plain text', () => {
+    const { view, label } = setup();
+    view.update(labelled('<b>hi'), 0);
+    expect(label().textContent).toBe('<b>hi');
+    expect(label().querySelector('b')).toBeNull();
+  });
+
+  it('stays at the end, with Time\'s up! showing too', () => {
+    const { view, label, timesUp } = setup();
+    view.update(labelled('🛏️💤'), FIFTEEN_MIN);
+    expect(label().hidden).toBe(false);
+    expect(label().textContent).toBe('🛏️💤');
+    expect(timesUp.hidden).toBe(false);
+  });
+
+  it('is not rebuilt when the label has not changed', () => {
+    const { view, label } = setup();
+    view.update(labelled('👟🚗'), 0);
+    const first = label().firstElementChild;
+    view.update(labelled('👟🚗'), 1000);
+    expect(first).not.toBeNull();
+    expect(label().firstElementChild).toBe(first);
+  });
+
+  it('follows a change of label', () => {
+    const { view, label } = setup();
+    view.update(labelled('👟'), 0);
+    expect(label().textContent).toBe('👟');
+    view.update(labelled('🛝'), 0);
+    expect(label().textContent).toBe('🛝');
+    view.update(labelled(''), 0);
+    expect(label().hidden).toBe(true);
   });
 });

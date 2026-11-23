@@ -11,7 +11,9 @@ import {
   readyApp,
   screenKeptAwake,
   setCode,
+  setLabel,
   setupScreen,
+  timerLabel,
   timerScreen,
   watchWakeLock,
 } from './helpers';
@@ -116,4 +118,32 @@ test('with saved data blocked by the browser, the timer still works for the visi
   await expect(digits(page)).toHaveText('05:00');
   await expect(page.locator('.startup-error')).toHaveCount(0);
   expect(warnings.some((text) => text.includes('blocks saved data'))).toBe(true);
+});
+
+test('reload mid-timer keeps the emoji line', async ({ page }) => {
+  await readyApp(page);
+  await setLabel(page, '🛏️💤');
+  await page.getByTestId('preset-15').click();
+  await expect(timerLabel(page)).toHaveText('🛏️💤');
+  await page.clock.runFor(60_000);
+  await page.reload();
+
+  await expect(digits(page)).toHaveText('14:00');
+  await expect(timerLabel(page)).toHaveText('🛏️💤');
+});
+
+test('data saved before the emoji line existed still loads, with no line', async ({ page }) => {
+  await readyApp(page);
+  // A running timer and a code, in the saved format that has no "label" key.
+  await page.evaluate((code) => {
+    const now = Date.now();
+    const timer = { status: 'running', totalMs: 600_000, endsAt: now + 600_000 };
+    const settings = { ringDirection: 'empties', passcode: code };
+    localStorage.setItem('kidstimer.v1', JSON.stringify({ settings, timer }));
+  }, CODE);
+  await page.reload();
+
+  await expect(timerScreen(page)).toBeVisible();
+  await expect(digits(page)).toHaveText('10:00');
+  await expect(timerLabel(page)).toBeHidden();
 });

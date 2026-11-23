@@ -195,3 +195,77 @@ Decisions made *before* approval are in the design
     - Situation: after the final review, one round of fixes was made and then checked once more by a separate reviewer. The helper making the fixes stalled while repeating its own last full test run, on a Mac that was very busy with other work at the time.
     - Chose: start the second check as soon as all the fixes were saved, stop the stalled helper, and run the full set of tests directly: 303 rule checks and 111 browser journeys, all passing. One line was then added to the device checklist (the keypad's circles on a real iPhone and iPad), which no reviewer read after it was written.
     - Why: every fix was already saved and the reviewer read exactly those. Waiting on the stalled run would have added nothing.
+
+## Emoji line
+
+Decisions made for the owner while adding the line of emojis under the time
+(from 2026-11-22). The owner approved the design
+(`docs/superpowers/specs/2026-11-22-emoji-label-design.md`), where earlier
+choices are tagged "(my call)". Nothing below was ruled by the owner.
+
+34. **Build plan was not held for review.**
+    - Situation: the planning process normally waits for the owner to read the plan.
+    - Chose: go straight to building, on a branch of its own (`feat/emoji-label`), with nothing sent to GitHub until the owner says so.
+    - Why: the owner said "you're on auto pilot until the whole implementation plan is done."
+
+35. **New commits in this project use the GitHub no-reply address.**
+    - Situation: the owner chose the no-reply address for the first Pull Request, but the computer-wide git setting would still sign new commits with a personal address.
+    - Chose: set the address for this project only. The computer-wide setting is untouched.
+    - Why: it keeps to what the owner already ruled for this public project without changing anything else on the computer.
+
+36. **Spaces do not count, and are not kept.**
+    - Situation: the line holds 4 symbols at most, and a parent may type a space between emojis.
+    - Chose: spaces are dropped as you type; the timer screen spaces the emojis evenly by itself.
+    - Why: a space should not use up one of the four places.
+
+37. **The box empties when a timer starts.**
+    - Situation: the design says the box is empty each time the start screen appears.
+    - Chose: clear it at the moment a timer starts, so it is already empty when the start screen comes back.
+    - Why: the same result, and nothing a parent has typed is ever wiped while they are still on the start screen.
+
+38. **A saved line that cannot be trusted is dropped, but the timer is kept.**
+    - Situation: saved data is checked when the app opens. A line that is not text, or is longer than 4 symbols, is bad data.
+    - Chose: show the timer with no line.
+    - Why: losing the picture is harmless; losing a running timer is not.
+
+39. **How big the emojis are, and how they are spaced.**
+    - Situation: the plan asks for the line to be as large as fits inside the ring, and never smaller than 9% of the ring's width, but leaves the exact size and spacing to the builder.
+    - Chose: each emoji is 12% of the ring's width (about 44 pixels on a phone, 120 on the TV), centred under the digits with the same small gap between each pair. The digits do not move or shrink when a line is showing.
+    - Why: this is close to the largest size that keeps four emojis inside the ring with a little room to spare. It was measured in Chrome and in Safari's engine on a phone held upright and sideways, a tablet and the TV, with the longest time (1440:00) and with the lock panel open. On a phone, the corners of four emojis stay about 8 pixels inside the ring in Safari's engine (which draws emojis widest) and about 16 in Chrome. Any bigger would leave almost no room for a device that draws emojis a little wider.
+
+40. **"Time's up!" when a line is showing.**
+    - Situation: the plan puts "Time's up!" under the emojis, and allows it to be smaller only if both cannot fit at its usual size.
+    - Chose: "Time's up!" keeps its usual size and sits just under the emojis, a little closer to them than it sits to the digits when there is no line. With no line, it is exactly where it was before.
+    - Why: both fit at the usual size, so nothing needed to shrink. On a phone, the corners of "Time's up!" stay about 8 pixels inside the ring.
+
+41. **The "What for?" box and its four buttons.**
+    - Situation: the design leaves the look of the quick picks and the box's grey hint text to the builder.
+    - Chose: the box looks like the other boxes on the start screen and shows "Emojis" in grey while empty. The four quick picks sit in one row under it, four across on every screen, showing only their emojis; a screen reader reads out their names ("TV", "Bed and zzz", "Shoes and car", "Slide"). With a keyboard that builds a character in several steps (Japanese, for example), the box waits until the character is finished before keeping the first four.
+    - Why: one row keeps the section short, so the time buttons stay near the top of a phone screen; each button is 81 pixels wide on the narrowest phone, well over the 44-pixel minimum. Trimming halfway through a character could cut it in two.
+
+42. **The box is emptied by the tap that starts the timer.**
+    - Situation: the plan said to empty the box when the start screen is redrawn and sees a timer has started. But the app does not redraw the start screen while a timer is on show, so that moment never comes and the box would keep the last emojis.
+    - Chose: the tap that starts a timer (a preset, the minutes Start, or the time Start) sends what is in the box and then empties it. A start that is refused with a message (such as "At least 1 minute." or "That's less than a minute away.") leaves the box as it was. Nothing else empties it, so emojis typed before going to "Change code" are still there on the way back.
+    - Why: this is exactly what entry 37 promises ("clear it at the moment a timer starts"), and it does not depend on the order in which the app redraws and shows its screens. The start screen checks every time before starting, so a start it sends is never turned down.
+
+43. **The layout checks went into a file of their own.**
+    - Situation: the plan named one file for the layout checks, but adding the new ones would have pushed it past the 400-line limit every file keeps.
+    - Chose: the new layout checks live in their own file, and the measuring helpers both layout files use moved to a third file.
+    - Why: it keeps every file under the limit without changing what any check does.
+
+44. **Changes from the last round of fixes.**
+    - Situation: the final review found small problems, none serious.
+    - Chose: (a) on a browser too old to count emojis properly, the app still opens and counts the line by character instead, so a family emoji could count as several; (b) a symbol far wider or taller than an emoji is cut off at an emoji-sized box, so the line can never leave the ring or draw over the time; (c) the "What for" box no longer capitalises or autocorrects what is typed.
+    - Why: (a) a blank page is far worse than a miscounted line; (b) the ring is the edge of the design, and the four ready-made sets, a family and a flag all fit in the box with room to spare; (c) the box is for emojis, and an iPhone changing the letters would only get in the way.
+
+45. **Things the final review raised that were left as they are.**
+    - Situation: the final review found nothing serious. It listed some points it would not judge, because they are a matter of taste or of how the timer is used.
+    - Chose: leave each of these alone.
+      - On a phone held sideways, the "What for?" section pushes the minutes box and the "until a time" box below the first screen. The four preset buttons are still on it.
+      - A ready-made set cannot be taken back with one tap: there is no "none" button, and tapping the same set again does not empty the box. Deleting it needs the keyboard.
+      - Emojis left in the box stay there until a timer starts, however long that is. They are in plain view at the top of the start screen.
+      - The box takes anything typed, including letters. Writing that runs right to left, or whose letters join up, will not read properly in the line, and an invisible character uses up one of the four places.
+      - A screen reader reads each emoji in the line but gives the line no name of its own.
+      - Each emoji is drawn inside a box only a little wider than Safari draws an emoji (about 4% to spare), so that an odd, very wide symbol cannot push the line out of the ring. If a real iPhone drew emojis wider than the test browser does, their edges would be shaved. The device checklist asks you to look.
+    - Why: the design puts "What for?" first, says a ready-made set replaces the box, and says the line is for emojis, not words. The rest are rare, or cannot be judged without a real device. Any of them can be revisited.
+    - One line was added to the device checklist after the last check (that no emoji is cut off at its edges), so no reviewer read that line.

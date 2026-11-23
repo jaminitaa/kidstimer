@@ -21,6 +21,7 @@ const RUNNING = startTimer(10 * MINUTE, NOW);
 const returning = initialState({
   settings: { ringDirection: 'empties', passcode: CODE },
   timer: null,
+  label: '',
 });
 
 function stateWith(overrides: Partial<AppState>): AppState {
@@ -67,12 +68,12 @@ describe('initial state', () => {
 
 describe('start', () => {
   it('starts a timer on setup', () => {
-    const next = reduce(returning, { type: 'start', durationMs: 5 * MINUTE }, NOW);
+    const next = reduce(returning, { type: 'start', durationMs: 5 * MINUTE, label: '' }, NOW);
     expect(next.timer).toEqual(startTimer(5 * MINUTE, NOW));
   });
 
   it('is ignored on the code and timer screens', () => {
-    const action: Action = { type: 'start', durationMs: 5 * MINUTE };
+    const action: Action = { type: 'start', durationMs: 5 * MINUTE, label: '' };
     const code = initialState(DEFAULT_PERSISTED);
     expect(reduce(code, action, NOW)).toBe(code);
     const running = onTimer();
@@ -81,13 +82,13 @@ describe('start', () => {
 
   it('is ignored for durations that are out of range or not finite', () => {
     for (const durationMs of [MINUTE - 1, 0, -5, MAX_TIMER_MS + 1, NaN, Infinity]) {
-      expect(reduce(returning, { type: 'start', durationMs }, NOW)).toBe(returning);
+      expect(reduce(returning, { type: 'start', durationMs, label: '' }, NOW)).toBe(returning);
     }
   });
 
   it('accepts both ends of the allowed range', () => {
-    expect(reduce(returning, { type: 'start', durationMs: MINUTE }, NOW).timer).not.toBeNull();
-    expect(reduce(returning, { type: 'start', durationMs: MAX_TIMER_MS }, NOW).timer).not.toBeNull();
+    expect(reduce(returning, { type: 'start', durationMs: MINUTE, label: '' }, NOW).timer).not.toBeNull();
+    expect(reduce(returning, { type: 'start', durationMs: MAX_TIMER_MS, label: '' }, NOW).timer).not.toBeNull();
   });
 });
 
@@ -341,7 +342,7 @@ describe('fast fingers', () => {
 describe('purity', () => {
   it('never changes a frozen input state', () => {
     const actions: Action[] = [
-      { type: 'start', durationMs: 5 * MINUTE },
+      { type: 'start', durationMs: 5 * MINUTE, label: '' },
       { type: 'set-direction', direction: 'fills' },
       { type: 'open-keypad' },
       { type: 'digit', digit: '2' },

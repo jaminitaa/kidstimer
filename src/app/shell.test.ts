@@ -11,7 +11,7 @@ const PAUSED: Timer = { status: 'paused', totalMs: 600_000, remainingMs: 300_000
 type Name = 'code' | 'setup' | 'timer' | 'lock';
 
 function stateWith(timer: Timer | null, overlay: Overlay = 'none', passcode: string | null = '2580') {
-  const base = initialState({ settings: { ringDirection: 'empties', passcode }, timer });
+  const base = initialState({ settings: { ringDirection: 'empties', passcode }, timer, label: '' });
   return { ...base, overlay } satisfies AppState;
 }
 

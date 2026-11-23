@@ -21,6 +21,7 @@ export const codeScreen = (page: Page): Locator => page.getByTestId('code-screen
 export const keypadOverlay = (page: Page): Locator => page.getByTestId('keypad-overlay');
 export const controls = (page: Page): Locator => page.getByTestId('controls');
 export const digits = (page: Page): Locator => page.getByTestId('digits');
+export const timerLabel = (page: Page): Locator => page.getByTestId('timer-label');
 export const timerScreen = (page: Page): Locator => page.getByTestId('timer-screen');
 export const setupScreen = (page: Page): Locator => page.getByTestId('setup-screen');
 export const appRoot = (page: Page): Locator => page.locator('#app');
@@ -87,6 +88,11 @@ export async function openControls(page: Page): Promise<void> {
   await expect(keypadOverlay(page)).toBeVisible();
   await enterCode(page, CODE);
   await expect(controls(page)).toBeVisible();
+}
+
+/** Types into the What for? box on the setup screen (the emoji line for the next timer). */
+export async function setLabel(page: Page, text: string): Promise<void> {
+  await page.getByTestId('label-input').fill(text);
 }
 
 /** Starts a timer from the setup screen with the custom-minutes box. */

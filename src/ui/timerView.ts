@@ -1,5 +1,6 @@
 import type { AppState } from '../app/state';
 import { formatRemaining } from '../core/format';
+import { symbolsOf } from '../core/label';
 import { ringDash, ringFraction, type RingDirection } from '../core/ring';
 import { stageFor } from '../core/stage';
 import { remainingMs } from '../core/timer';
@@ -23,6 +24,7 @@ type Parts = {
   readonly root: HTMLElement;
   readonly arc: SVGCircleElement;
   readonly digits: HTMLElement;
+  readonly label: HTMLElement;
   readonly timesUp: HTMLElement;
 };
 
@@ -71,12 +73,18 @@ function build(): Parts {
   const { svg, arc } = ring();
   const digits = element('div', 'digits', 'digits');
   digits.setAttribute('role', 'timer');
+  const label = element('div', 'timer-label', 'timer-label');
+  label.hidden = true;
   const timesUp = element('div', 'times-up', 'times-up');
   timesUp.textContent = TIMES_UP_TEXT;
   timesUp.hidden = true;
+  // Hangs under the digits, so the readout's own box is just the digits and they stay centred.
+  const below = document.createElement('div');
+  below.className = 'readout-below';
+  below.append(label, timesUp);
   const readout = document.createElement('div');
   readout.className = 'readout';
-  readout.append(digits, timesUp);
+  readout.append(digits, below);
   const center = document.createElement('div');
   center.className = 'ring-center';
   center.append(readout);
@@ -84,7 +92,21 @@ function build(): Parts {
   box.className = 'ring-box';
   box.append(svg, center);
   root.append(box);
-  return { root, arc, digits, timesUp };
+  return { root, arc, digits, label, timesUp };
+}
+
+function symbol(text: string): HTMLElement {
+  const el = document.createElement('span');
+  el.className = 'timer-label-symbol';
+  el.textContent = text;
+  return el;
+}
+
+/** One element per symbol, so the line can space them evenly. Rebuilt only when it changes. */
+function drawLabel(el: HTMLElement, label: string): void {
+  if (el.textContent !== label) el.replaceChildren(...symbolsOf(label).map(symbol));
+  const empty = label === '';
+  if (el.hidden !== empty) el.hidden = empty;
 }
 
 function drawArc(arc: SVGCircleElement, fraction: number, direction: RingDirection): void {
@@ -107,10 +129,14 @@ function render(parts: Parts, state: AppState, now: number): void {
   if (parts.root.dataset.stage !== stage) applyStage(parts.root, stage);
   const finished = stage === 'done';
   if (parts.timesUp.hidden === finished) parts.timesUp.hidden = !finished;
+  drawLabel(parts.label, state.label);
   drawArc(parts.arc, ringFraction(left, timer.totalMs, direction), direction);
 }
 
-/** The running screen: a ring around big minutes:seconds digits. It has no controls. */
+/**
+ * The running screen: a ring around big minutes:seconds digits, with the emoji line (if any)
+ * under them. It has no controls.
+ */
 export function createTimerView(): View {
   const parts = build();
   return {
