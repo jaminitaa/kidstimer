@@ -66,6 +66,9 @@ function whatFor(): {
   const box = make('input', 'field', 'label-input');
   box.type = 'text';
   box.autocomplete = 'off';
+  box.setAttribute('autocapitalize', 'off');
+  box.setAttribute('autocorrect', 'off');
+  box.spellcheck = false;
   box.placeholder = 'Emojis';
   box.setAttribute('aria-label', 'What for');
   box.addEventListener('input', (event) => {

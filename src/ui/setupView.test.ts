@@ -171,6 +171,9 @@ describe('createSetupView: What for?', () => {
     expect(box.value).toBe('');
     expect(box.getAttribute('aria-label')).toBe('What for');
     expect(box.getAttribute('autocomplete')).toBe('off');
+    expect(box.getAttribute('autocapitalize')).toBe('off');
+    expect(box.getAttribute('autocorrect')).toBe('off');
+    expect(box.spellcheck).toBe(false);
   });
 
   it('keeps only the first 4 symbols as you type', () => {
