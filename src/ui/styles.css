@@ -156,3 +156,256 @@ body {
     transition: none;
   }
 }
+
+/* ---------- Setup and code screens (calm stage colors, set by applyStage) ---------- */
+
+.setup-screen,
+.code-screen {
+  position: fixed;
+  inset: 0;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px))
+    max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  background-color: var(--stage-bg);
+  color: var(--stage-digits);
+  font-family: var(--font-rounded);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Scrolls vertically if a short screen needs it; never sideways. */
+.setup-screen {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.setup-inner {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.setup-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.setup-label {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.setup-row {
+  display: flex;
+  gap: 12px;
+}
+
+.setup-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.btn,
+.field {
+  min-width: 0;
+  min-height: 56px;
+  padding: 0 20px;
+  border-radius: 16px;
+  font: inherit;
+  font-size: 1.125rem; /* 16px or more stops iOS Safari zooming into the field */
+  font-weight: 700;
+  color: var(--stage-digits);
+}
+
+.btn {
+  border: 3px solid var(--stage-ring);
+  background-color: var(--stage-track);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn:focus-visible,
+.field:focus-visible,
+.btn-link:focus-visible,
+.code-cancel:focus-visible {
+  outline: 3px solid var(--stage-digits);
+  outline-offset: 2px;
+}
+
+.btn:active {
+  background-color: #ffffff;
+}
+
+.btn-preset {
+  min-height: 88px;
+  font-size: 1.75rem;
+}
+
+.btn-choice {
+  flex: 1;
+}
+
+.btn-choice[aria-pressed='true'] {
+  background-color: var(--stage-ring);
+  color: #ffffff;
+}
+
+.field {
+  flex: 1;
+  border: 3px solid var(--stage-ring);
+  background-color: #ffffff;
+}
+
+.setup-error,
+.code-error {
+  margin: 0;
+  min-height: 1.4em;
+  font-weight: 700;
+  color: var(--stage-digits);
+}
+
+.btn-link {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 1rem;
+  text-decoration: underline;
+  color: var(--stage-digits);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+@media (min-width: 700px) {
+  .preset-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .setup-inner {
+    max-width: 640px;
+    padding-top: 4vh;
+  }
+}
+
+/* Code screen: title, dots, error, keypad, cancel, stacked and centered. */
+.code-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.code-title {
+  margin: 0;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.code-error {
+  text-align: center;
+}
+
+.code-cancel {
+  min-height: 44px;
+  padding: 0 24px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: underline;
+  color: var(--stage-digits);
+  cursor: pointer;
+}
+
+/* ---------- Keypad (shared with the lock overlay) ---------- */
+
+.dots {
+  display: flex;
+  gap: 20px;
+}
+
+.dot {
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--stage-digits);
+  border-radius: 50%;
+  background-color: transparent;
+}
+
+.dot[data-filled='true'] {
+  background-color: var(--stage-digits);
+}
+
+.keypad {
+  --key-size: clamp(64px, 17dvmin, 92px);
+  display: grid;
+  grid-template-columns: repeat(3, var(--key-size));
+  gap: clamp(12px, 3dvmin, 24px);
+}
+
+/* The 0 key is the 11th grid cell; start it in the middle column of the last row. */
+.key-digit[data-digit='0'] {
+  grid-column: 2;
+}
+
+/*
+ * The kids can read digits, so a pressed key must look exactly like an untouched one.
+ * No :hover, :active or :focus styling on any key; the dots are the only feedback.
+ */
+.key {
+  width: var(--key-size);
+  height: var(--key-size);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background-color: var(--stage-track);
+  box-shadow: inset 0 0 0 3px var(--stage-ring);
+  font: inherit;
+  font-size: calc(var(--key-size) * 0.4);
+  line-height: 1;
+  color: var(--stage-digits);
+  cursor: pointer;
+  outline: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.key:focus,
+.key:focus-visible {
+  outline: none;
+}
+
+/* Delete is an icon, not a circle: same size, no fill, so it reads as a different kind of key. */
+.key-delete {
+  grid-column: 3;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .key {
+    transition: none;
+  }
+}

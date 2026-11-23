@@ -112,3 +112,8 @@ Decisions made *before* approval are in the design
     - Situation: the digits must always sit inside the ring, from `05:00` to `1440:00`, on a phone, a tablet and the TV.
     - Chose: a thick, round-ended ring, with digits sized as a share of the ring that steps down for 6 and 7 characters, leaving a margin for fonts with wider numbers. "Time's up!" appears in smaller letters under the digits, inside the ring.
     - Why: checked in Chrome at phone, tablet and TV sizes, and against the Safari font's measurements; the digits use at most about 86% of the room inside the ring. The digits stay exactly centered, so nothing jumps when the timer ends.
+
+21. **Setup and code screens: what the keypad shows, and a few small choices.**
+    - Situation: the plan fixes the layout but not the look of the keys, the preset button text, or how the screens fit a phone and a laptop.
+    - Chose: digit keys are plain circles with no pressed, hover or focus look, so only the row of dots shows a touch; the delete key shows a backspace symbol with no circle. Preset buttons read "5 min", "10 min", "15 min", "30 min", two across on a phone and four across on a wide screen. Both screens use the calm sky-blue colors. The "Cancel" button on the code screen is hidden on first run, when there is no code to go back to.
+    - Why: the kids can read digits, so nothing may reveal which key was touched. Big buttons (at least 56 px, presets 88 px) suit an adult in a hurry and meet the 44 px touch minimum. Two across fits a 393 px phone without sideways scrolling.
