@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { CODE, digits, setCode } from './helpers';
+import { CODE, digits, readSeconds, setCode } from './helpers';
 
 // Runs against the built app (`vite preview`), the only version with an offline copy.
 // Real time, not page.clock: the service worker runs outside the page and its clock.
@@ -30,7 +30,9 @@ test('opened once, it then works with no network', async ({ page, context }) => 
 
   await setCode(page, CODE);
   await page.getByTestId('preset-5').click();
-  await expect(digits(page)).toHaveText('05:00');
-  // Real seconds pass here, so the digits must move on within a few of them.
-  await expect(digits(page)).toHaveText(/^04:5\d$/);
+  // Real seconds pass here: on a slow machine the first reading may already be past 05:00.
+  await expect(digits(page)).toHaveText(/^(05:00|04:5\d)$/);
+  const first = await readSeconds(page);
+  // And the digits must keep going down.
+  await expect.poll(() => readSeconds(page)).toBeLessThan(first);
 });
