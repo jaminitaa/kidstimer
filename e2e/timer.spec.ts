@@ -9,8 +9,10 @@ import {
   openControls,
   readyApp,
   setCode,
+  setLabel,
   setupScreen,
   startCustom,
+  timerLabel,
   timerScreen,
 } from './helpers';
 
@@ -125,4 +127,66 @@ test('ring direction: "Fills up" grows, "Empties" shrinks', async ({ page }) => 
   const emptiesAtStart = await arcLength(page);
   await page.clock.runFor(60_000);
   expect(await arcLength(page)).toBeLessThan(emptiesAtStart);
+});
+
+test('a quick pick, then a preset: the timer shows the picked emojis', async ({ page }) => {
+  await readyApp(page);
+  await page.getByTestId('pick-shoes').click();
+  await page.getByTestId('preset-5').click();
+  await expect(digits(page)).toHaveText('05:00');
+  await expect(timerLabel(page)).toBeVisible();
+  await expect(timerLabel(page)).toHaveText('👟🚗');
+});
+
+test('typed emojis go with a custom-minutes timer', async ({ page }) => {
+  await readyApp(page);
+  await setLabel(page, '🛝');
+  await startCustom(page, '15');
+  await expect(digits(page)).toHaveText('15:00');
+  await expect(timerLabel(page)).toHaveText('🛝');
+});
+
+test('typed emojis go with an until-a-time timer', async ({ page }) => {
+  await readyApp(page, '2026-11-23T09:10:30Z');
+  await setLabel(page, '📺');
+  await page.getByTestId('until-time').fill('09:30');
+  await page.getByTestId('until-start').click();
+  await expect(digits(page)).toHaveText('19:30');
+  await expect(timerLabel(page)).toHaveText('📺');
+});
+
+test('with no emojis chosen, the timer shows no line', async ({ page }) => {
+  await readyApp(page);
+  await page.getByTestId('preset-5').click();
+  await expect(digits(page)).toHaveText('05:00');
+  await expect(timerLabel(page)).toBeHidden();
+});
+
+test('more than 4 emojis: the box keeps the first 4, and so does the timer', async ({
+  page,
+}) => {
+  await readyApp(page);
+  await setLabel(page, '📺🛏️💤👟🚗🛝');
+  await expect(page.getByTestId('label-input')).toHaveValue('📺🛏️💤👟');
+  await page.getByTestId('preset-5').click();
+  await expect(timerLabel(page)).toHaveText('📺🛏️💤👟');
+});
+
+test('tapping the emoji line on a running timer does nothing', async ({ page }) => {
+  await readyApp(page);
+  await setLabel(page, '🛏️💤');
+  await page.getByTestId('preset-15').click();
+  const box = await timerLabel(page).boundingBox();
+  if (box === null) throw new Error('The emoji line is not showing.');
+  for (let tap = 0; tap < 10; tap += 1) {
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await page.clock.runFor(100);
+  }
+  await expect(timerLabel(page)).toHaveText('🛏️💤');
+  await nextFrame(page);
+  // Ten taps 100 ms apart: exactly 1 second has passed, and the timer kept running.
+  await expect(digits(page)).toHaveText('14:59');
+  await expect(timerScreen(page)).toBeVisible();
+  await expect(page.locator('#app')).toHaveAttribute('data-overlay', 'none');
+  await expect(setupScreen(page)).toBeHidden();
 });

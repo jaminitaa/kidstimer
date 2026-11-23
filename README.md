@@ -1,6 +1,6 @@
 # Kids Timer
 
-A countdown timer for the kids. It shows a big colored ring and the minutes and seconds left. The ring turns from blue to orange to red as time runs out, rings a soft bell at 15, 10, 5, 3 and 1 minutes left, and plays a short tune at zero.
+A countdown timer for the kids. It shows a big colored ring and the minutes and seconds left. The ring turns from blue to orange to red as time runs out, rings a soft bell at 15, 10, 5, 3 and 1 minutes left, and plays a short tune at zero. A line of up to 4 emojis under the time can show what the timer is for.
 
 While a timer is running, touching the screen does nothing. Only a grown-up with the 4-digit code can pause it, add time, or stop it.
 
@@ -43,12 +43,13 @@ You do this once per device. After that the MacBook can be off, and the timer wo
 
 ## Using it
 
-1. **Presets**: tap 5, 10, 15 or 30 minutes to start right away.
-2. **Custom**: enter any whole number of minutes from 1 to 1440 (24 hours).
-3. **Until a time**: pick a clock time, and the timer counts down to it.
-4. **Ring direction**: choose whether the ring empties or fills as time passes.
-5. **While it runs**: touching does nothing. To open the keypad, press and hold anywhere for 2 seconds with one finger. It will not open while another finger (or a child's hand) is also on the screen. On the MacBook, click and hold, or hold Space or Enter.
-6. Enter the code on the keypad. The keys are plain circles with no numbers, laid out like a phone. On the MacBook you can type the digits instead.
+1. **What for** (optional): type up to 4 emojis in the "What for" box, or tap one of the four ready-made sets (TV; bed and zzz; shoes and car; slide). They show under the time while the timer runs. Leave the box empty for no line. Do this before tapping a preset, because presets start at once. The line cannot be changed while the timer runs: stop it and start again. The box is empty again each time a timer starts.
+2. **Presets**: tap 5, 10, 15 or 30 minutes to start right away.
+3. **Custom**: enter any whole number of minutes from 1 to 1440 (24 hours).
+4. **Until a time**: pick a clock time, and the timer counts down to it.
+5. **Ring direction**: choose whether the ring empties or fills as time passes.
+6. **While it runs**: touching does nothing. To open the keypad, press and hold anywhere for 2 seconds with one finger. It will not open while another finger (or a child's hand) is also on the screen. On the MacBook, click and hold, or hold Space or Enter.
+7. Enter the code on the keypad. The keys are plain circles with no numbers, laid out like a phone. On the MacBook you can type the digits instead.
 
 ```
   1    2    3
@@ -57,9 +58,11 @@ You do this once per device. After that the MacBook can be off, and the timer wo
        0    ⌫
 ```
 
-7. **Controls** after the right code: Pause or Resume, add 1 minute, add 5 minutes, or Stop. Stop takes you back to the start screen.
-8. The keypad and the controls close by themselves after 10 seconds without a touch.
-9. When time is up, "Time's up!" shows until you enter the code. That takes you back to the start screen.
+8. **Controls** after the right code: Pause or Resume, add 1 minute, add 5 minutes, or Stop. Stop takes you back to the start screen.
+9. The keypad and the controls close by themselves after 10 seconds without a touch.
+10. When time is up, "Time's up!" shows until you enter the code. That takes you back to the start screen.
+
+Tip: on the MacBook, press Control + Command + Space to open the emoji picker while the cursor is in the "What for" box.
 
 Tip: on the iPhone and iPad a child can still swipe out of any app, the timer included. To lock the device to the timer, turn on Guided Access (Settings, then Accessibility, then Guided Access), open the timer, and triple-click the side button (or the Home button) to start it.
 
@@ -81,6 +84,7 @@ Tip: on the iPhone and iPad a child can still swipe out of any app, the timer in
 - The TV shows the MacBook screen, so sound comes out wherever the mirroring sends it. Normal screen mirroring sends it to the TV.
 - On an iPhone, the silent switch may mute the bells. Flip it to ring if you hear nothing.
 - Browsers keep a page silent until someone taps it. If you reopen the timer while it is running, a small "tap for sound" note shows in the top-left corner. Tap once anywhere.
+- The slide emoji needs a recent system (iOS 15.4 or macOS 12.3 and later). On an older one it shows as an empty box.
 
 ## Updating
 
@@ -126,3 +130,6 @@ The automatic tests cannot check these. Tick them on the real devices. After eac
 - [ ] iPhone: the keypad is comfortable one-handed. Working: holding the phone in one hand, upright and sideways, your thumb reaches every key.
 - [ ] MacBook: `npm start` opens at `http://localhost:4173`, and the keyboard works. Working: holding Space for 2 seconds opens the keypad, and typing the code opens the controls.
 - [ ] MacBook mirrored to the TV: the dings come out of the TV. Working: the ring and digits fit the TV screen, and the 1-minute bell is heard from the TV.
+- [ ] iPhone, iPad and MacBook: the four ready-made sets show as pictures. Working: the TV, the bed and zzz, the shoes and car, and the slide all appear as small pictures, not empty boxes.
+- [ ] MacBook mirrored to the TV: the emojis can be read from across the room. Working: with an emoji set chosen, you can tell which one it is from the sofa.
+- [ ] iPhone: with four emojis and at "Time's up!", the emoji line and "Time's up!" sit inside the ring without touching it. Working: there is a visible gap between them and the ring all the way round (the automatic check passes with only a small margin on a phone-sized screen, and real phones can draw emojis slightly larger).

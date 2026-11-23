@@ -11,7 +11,9 @@ import {
   openControls,
   readSeconds,
   readyApp,
+  setLabel,
   setupScreen,
+  timerLabel,
   timerScreen,
 } from './helpers';
 
@@ -215,4 +217,60 @@ test('keyboard: hold Space for the keypad, type the code, Escape closes', async 
 
   await page.keyboard.press('Escape');
   await expectLocked(page);
+});
+
+test('pause, resume and +1 min keep the emoji line showing', async ({ page }) => {
+  await readyApp(page);
+  await setLabel(page, '👟🚗');
+  await page.getByTestId('preset-15').click();
+  await openControls(page);
+  await expect(timerLabel(page)).toHaveText('👟🚗');
+
+  await page.getByTestId('control-pause').click();
+  await expect(timerLabel(page)).toHaveText('👟🚗');
+  await page.getByTestId('control-pause').click();
+  await expect(page.getByTestId('control-pause')).toHaveText('Pause');
+  await expect(timerLabel(page)).toHaveText('👟🚗');
+  await page.getByTestId('control-add-1').click();
+  await expect(timerLabel(page)).toHaveText('👟🚗');
+});
+
+test('stop empties the box, so the next timer has no emoji line', async ({ page }) => {
+  await readyApp(page);
+  await setLabel(page, '📺');
+  await page.getByTestId('preset-15').click();
+  await expect(timerLabel(page)).toHaveText('📺');
+  await openControls(page);
+  await page.getByTestId('control-stop').click();
+
+  await expect(setupScreen(page)).toBeVisible();
+  await expect(page.getByTestId('label-input')).toHaveValue('');
+  await page.getByTestId('preset-5').click();
+  await expect(digits(page)).toHaveText('05:00');
+  await expect(timerLabel(page)).toBeHidden();
+});
+
+test("time's up shows the emoji line too; the code empties the box", async ({ page }) => {
+  await readyApp(page);
+  await setLabel(page, '🛝');
+  await page.getByTestId('preset-5').click();
+  await page.clock.fastForward('05:00');
+  await expect(page.getByTestId('times-up')).toBeVisible();
+  await expect(timerLabel(page)).toHaveText('🛝');
+
+  await holdToOpen(page);
+  await enterCode(page, CODE);
+  await expect(setupScreen(page)).toBeVisible();
+  await expect(page.getByTestId('label-input')).toHaveValue('');
+});
+
+test('emojis typed and left while visiting "Change code" are still there after Cancel', async ({
+  page,
+}) => {
+  await readyApp(page);
+  await setLabel(page, '👟');
+  await page.getByTestId('change-code').click();
+  await page.getByTestId('code-cancel').click();
+  await expect(setupScreen(page)).toBeVisible();
+  await expect(page.getByTestId('label-input')).toHaveValue('👟');
 });
