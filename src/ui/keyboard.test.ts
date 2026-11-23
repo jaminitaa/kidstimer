@@ -64,6 +64,24 @@ describe('attachKeyboard', () => {
     expect(dispatch).toHaveBeenNthCalledWith(2, { type: 'delete-digit' });
   });
 
+  it('types one digit, and deletes once, for a key that is leaned on', () => {
+    for (const screen of [stateWith({ overlay: 'keypad' }), stateWith({ code: true })]) {
+      dispatch.mockClear();
+      state = screen;
+      press('1');
+      press('1', { repeat: true });
+      press('1', { repeat: true });
+      press('1', { repeat: true });
+      press('Backspace');
+      const repeat = press('Backspace', { repeat: true });
+      expect(repeat.defaultPrevented).toBe(true);
+      expect(dispatch.mock.calls).toEqual([
+        [{ type: 'digit', digit: '1' }],
+        [{ type: 'delete-digit' }],
+      ]);
+    }
+  });
+
   it('ignores letters and other keys', () => {
     state = stateWith({ overlay: 'keypad' });
     press('a');

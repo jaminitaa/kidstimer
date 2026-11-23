@@ -43,12 +43,13 @@ export function attachKeyboard(
     if (event.metaKey || event.ctrlKey || event.altKey || isTextField(event.target)) return;
     const state = getState();
     const typing = state.overlay === 'keypad' || screenFor(state) === 'code';
+    // A key held down repeats; a leaned-on key must not type a whole code like 1111.
     if (typing && DIGIT_KEY.test(event.key)) {
       event.preventDefault();
-      dispatch({ type: 'digit', digit: event.key });
+      if (!event.repeat) dispatch({ type: 'digit', digit: event.key });
     } else if (typing && event.key === 'Backspace') {
       event.preventDefault();
-      dispatch({ type: 'delete-digit' });
+      if (!event.repeat) dispatch({ type: 'delete-digit' });
     } else if (event.key === 'Escape' && state.overlay !== 'none') {
       dispatch({ type: 'close-overlay' });
     } else if (
