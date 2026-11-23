@@ -44,6 +44,7 @@ You do this once per device. After that the MacBook can be off, and the timer wo
 ## Using it
 
 1. **What for** (optional): type up to 4 emojis in the "What for" box, or tap one of the four ready-made sets (TV; bed and zzz; shoes and car; slide). They show under the time while the timer runs. Leave the box empty for no line. Do this before tapping a preset, because presets start at once. The line cannot be changed while the timer runs: stop it and start again. The box is empty again each time a timer starts.
+   - Tip: on the MacBook, press Control + Command + Space to open the emoji picker while the cursor is in the "What for" box.
 2. **Presets**: tap 5, 10, 15 or 30 minutes to start right away.
 3. **Custom**: enter any whole number of minutes from 1 to 1440 (24 hours).
 4. **Until a time**: pick a clock time, and the timer counts down to it.
@@ -61,8 +62,6 @@ You do this once per device. After that the MacBook can be off, and the timer wo
 8. **Controls** after the right code: Pause or Resume, add 1 minute, add 5 minutes, or Stop. Stop takes you back to the start screen.
 9. The keypad and the controls close by themselves after 10 seconds without a touch.
 10. When time is up, "Time's up!" shows until you enter the code. That takes you back to the start screen.
-
-Tip: on the MacBook, press Control + Command + Space to open the emoji picker while the cursor is in the "What for" box.
 
 Tip: on the iPhone and iPad a child can still swipe out of any app, the timer included. To lock the device to the timer, turn on Guided Access (Settings, then Accessibility, then Guided Access), open the timer, and triple-click the side button (or the Home button) to start it.
 
@@ -105,7 +104,7 @@ You do not need the tests to use the timer. They are there to catch mistakes whe
 
 1. `npm test` checks the timer's rules. It takes a few seconds.
 2. `npm run test:coverage` runs the same checks and says how much of the timer they cover. It fails if any part is under 80%.
-3. `npm run test:e2e` opens the timer in two browsers, Chrome and Safari's engine (standing in for the iPhone and iPad), and uses it the way a parent would: setting the code, starting timers, the lock, reloading, phone and TV screen sizes, and opening with no network. It takes about a minute.
+3. `npm run test:e2e` opens the timer in two browsers, Chrome and Safari's engine (standing in for the iPhone and iPad), and uses it the way a parent would: setting the code, starting timers, the lock, reloading, phone and TV screen sizes, and opening with no network. It takes a few minutes.
    - The first time, download the two test browsers with `npx playwright install chromium webkit`.
    - It needs ports 5173 and 4174 free. If `npm run dev` is running, stop it first (Control + C).
    - If a check fails, it prints which one and why.
@@ -133,3 +132,4 @@ The automatic tests cannot check these. Tick them on the real devices. After eac
 - [ ] iPhone, iPad and MacBook: the four ready-made sets show as pictures. Working: the TV, the bed and zzz, the shoes and car, and the slide all appear as small pictures, not empty boxes.
 - [ ] MacBook mirrored to the TV: the emojis can be read from across the room. Working: with an emoji set chosen, you can tell which one it is from the sofa.
 - [ ] iPhone: with four emojis and at "Time's up!", the emoji line and "Time's up!" sit inside the ring without touching it. Working: there is a visible gap between them and the ring all the way round (the automatic check passes with only a small margin on a phone-sized screen, and real phones can draw emojis slightly larger).
+- [ ] iPhone: tap the What for box, type an emoji, then tap a preset while the keyboard is still showing, upright and sideways. Working: the timer starts with the emoji and the keyboard goes away.

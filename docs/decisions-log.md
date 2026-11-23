@@ -247,3 +247,13 @@ choices are tagged "(my call)". Nothing below was ruled by the owner.
     - Situation: the plan said to empty the box when the start screen is redrawn and sees a timer has started. But the app does not redraw the start screen while a timer is on show, so that moment never comes and the box would keep the last emojis.
     - Chose: the tap that starts a timer (a preset, the minutes Start, or the time Start) sends what is in the box and then empties it. A start that is refused with a message (such as "At least 1 minute." or "That's less than a minute away.") leaves the box as it was. Nothing else empties it, so emojis typed before going to "Change code" are still there on the way back.
     - Why: this is exactly what entry 37 promises ("clear it at the moment a timer starts"), and it does not depend on the order in which the app redraws and shows its screens. The start screen checks every time before starting, so a start it sends is never turned down.
+
+43. **The layout checks went into a file of their own.**
+    - Situation: the plan named one file for the layout checks, but adding the new ones would have pushed it past the 400-line limit every file keeps.
+    - Chose: the new layout checks live in their own file, and the measuring helpers both layout files use moved to a third file.
+    - Why: it keeps every file under the limit without changing what any check does.
+
+44. **Changes from the last round of fixes.**
+    - Situation: the final review found small problems, none serious.
+    - Chose: (a) on a browser too old to count emojis properly, the app still opens and counts the line by character instead, so a family emoji could count as several; (b) a symbol far wider or taller than an emoji is cut off at an emoji-sized box, so the line can never leave the ring or draw over the time; (c) the "What for" box no longer capitalises or autocorrects what is typed.
+    - Why: (a) a blank page is far worse than a miscounted line; (b) the ring is the edge of the design, and the four ready-made sets, a family and a flag all fit in the box with room to spare; (c) the box is for emojis, and an iPhone changing the letters would only get in the way.
