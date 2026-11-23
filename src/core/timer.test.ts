@@ -22,6 +22,18 @@ describe('timer', () => {
     expect(remainingMs(t, T0 + 700_000)).toBe(0);
   });
 
+  it('never reports more than the total, after a clock change or with a bad saved end', () => {
+    const anHourEarlier = T0 - 3_600_000;
+    expect(remainingMs(t, anHourEarlier)).toBe(600_000);
+    const badEnd = frozen({ status: 'running', totalMs: 600_000, endsAt: T0 + 86_400_000 });
+    expect(remainingMs(badEnd, T0)).toBe(600_000);
+    expect(pauseTimer(badEnd, T0)).toEqual({
+      status: 'paused',
+      totalMs: 600_000,
+      remainingMs: 600_000,
+    });
+  });
+
   it('knows when it is done', () => {
     expect(isDone(t, T0 + 599_999)).toBe(false);
     expect(isDone(t, T0 + 600_000)).toBe(true);

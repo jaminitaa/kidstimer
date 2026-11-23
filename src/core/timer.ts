@@ -8,9 +8,13 @@ export function startTimer(durationMs: number, now: number): Timer {
   return { status: 'running', totalMs: durationMs, endsAt: now + durationMs };
 }
 
-/** Time left, never below 0. A paused timer is frozen. */
+/**
+ * Time left, never below 0 and never above the timer's total (a device clock set back, or
+ * a bad saved end time, could otherwise show more than was set). A paused timer is frozen.
+ */
 export function remainingMs(timer: Timer, now: number): number {
-  return timer.status === 'running' ? Math.max(0, timer.endsAt - now) : timer.remainingMs;
+  const left = timer.status === 'running' ? timer.endsAt - now : timer.remainingMs;
+  return Math.min(timer.totalMs, Math.max(0, left));
 }
 
 export function isDone(timer: Timer, now: number): boolean {
