@@ -195,3 +195,35 @@ Decisions made *before* approval are in the design
     - Situation: after the final review, one round of fixes was made and then checked once more by a separate reviewer. The helper making the fixes stalled while repeating its own last full test run, on a Mac that was very busy with other work at the time.
     - Chose: start the second check as soon as all the fixes were saved, stop the stalled helper, and run the full set of tests directly: 303 rule checks and 111 browser journeys, all passing. One line was then added to the device checklist (the keypad's circles on a real iPhone and iPad), which no reviewer read after it was written.
     - Why: every fix was already saved and the reviewer read exactly those. Waiting on the stalled run would have added nothing.
+
+## Emoji line
+
+Decisions made for the owner while adding the line of emojis under the time
+(from 2026-11-22). The owner approved the design
+(`docs/superpowers/specs/2026-11-22-emoji-label-design.md`), where earlier
+choices are tagged "(my call)". Nothing below was ruled by the owner.
+
+34. **Build plan was not held for review.**
+    - Situation: the planning process normally waits for the owner to read the plan.
+    - Chose: go straight to building, on a branch of its own (`feat/emoji-label`), with nothing sent to GitHub until the owner says so.
+    - Why: the owner said "you're on auto pilot until the whole implementation plan is done."
+
+35. **New commits in this project use the GitHub no-reply address.**
+    - Situation: the owner chose the no-reply address for the first Pull Request, but the computer-wide git setting would still sign new commits with a personal address.
+    - Chose: set the address for this project only. The computer-wide setting is untouched.
+    - Why: it keeps to what the owner already ruled for this public project without changing anything else on the computer.
+
+36. **Spaces do not count, and are not kept.**
+    - Situation: the line holds 4 symbols at most, and a parent may type a space between emojis.
+    - Chose: spaces are dropped as you type; the timer screen spaces the emojis evenly by itself.
+    - Why: a space should not use up one of the four places.
+
+37. **The box empties when a timer starts.**
+    - Situation: the design says the box is empty each time the start screen appears.
+    - Chose: clear it at the moment a timer starts, so it is already empty when the start screen comes back.
+    - Why: the same result, and nothing a parent has typed is ever wiped while they are still on the start screen.
+
+38. **A saved line that cannot be trusted is dropped, but the timer is kept.**
+    - Situation: saved data is checked when the app opens. A line that is not text, or is longer than 4 symbols, is bad data.
+    - Chose: show the timer with no line.
+    - Why: losing the picture is harmless; losing a running timer is not.

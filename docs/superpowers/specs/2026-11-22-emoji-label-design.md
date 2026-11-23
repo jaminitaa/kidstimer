@@ -1,7 +1,7 @@
 # Emoji line under the time: Design
 
 Date: 2026-11-22
-Status: waiting for the owner's approval
+Status: approved by owner 2026-11-22
 Builds on: `docs/superpowers/specs/2026-11-22-kids-timer-design.md`
 
 **(ruled)** marks something the owner decided in conversation. **(my call)**
