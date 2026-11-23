@@ -274,3 +274,21 @@ test('emojis typed and left while visiting "Change code" are still there after C
   await expect(setupScreen(page)).toBeVisible();
   await expect(page.getByTestId('label-input')).toHaveValue('👟');
 });
+
+test('pressing and holding for 2 seconds on the emoji line opens the keypad, then the code the controls', async ({
+  page,
+}) => {
+  await readyApp(page);
+  await setLabel(page, '🛏️💤');
+  await page.getByTestId('preset-15').click();
+  const box = await timerLabel(page).boundingBox();
+  if (box === null) throw new Error('The emoji line is not showing.');
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.clock.runFor(2000);
+  await page.mouse.up();
+  await expect(keypadOverlay(page)).toBeVisible();
+  await enterCode(page, CODE);
+  await expect(controls(page)).toBeVisible();
+  await expect(timerLabel(page)).toHaveText('🛏️💤');
+});
