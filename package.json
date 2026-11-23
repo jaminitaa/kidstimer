@@ -1,0 +1,28 @@
+{
+  "name": "kidstimer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "start": "vite build && vite preview --port 4173 --strictPort",
+    "share": "node scripts/share.mjs",
+    "icons": "pwa-assets-generator"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@vite-pwa/assets-generator": "^2.0.0",
+    "@vitest/coverage-v8": "^5.1.1",
+    "jsdom": "^31.0.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.1.1"
+  }
+}

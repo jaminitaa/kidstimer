@@ -1,0 +1,32 @@
+/* ---------- Shell: the "Tap for sound" note and the start-up error ---------- */
+
+/*
+ * Sits in the top-left corner, which the ring never reaches in portrait or landscape.
+ * It never takes a touch: a tap or a hold on it lands on the timer screen underneath.
+ */
+.sound-hint {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  left: max(12px, env(safe-area-inset-left, 0px));
+  z-index: 5;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-family: var(--font-rounded);
+  font-size: 1.125rem;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.startup-error {
+  margin: 0;
+  padding: max(24px, env(safe-area-inset-top, 0px)) 24px 24px;
+  font-family: var(--font-rounded);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
