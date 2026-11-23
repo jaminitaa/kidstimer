@@ -28,7 +28,57 @@ describe('attachHold', () => {
     el = document.createElement('div');
     onHold = vi.fn();
   });
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  /** The page going into the background (a call, the app switcher, a locked screen). */
+  const hidePage = (): void => {
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    document.dispatchEvent(new Event('visibilitychange'));
+  };
+  const blurWindow = (): void => void window.dispatchEvent(new Event('blur'));
+
+  it.each([
+    ['the page is hidden', hidePage],
+    ['the window loses focus', blurWindow],
+  ])('forgets a finger whose lift was lost when %s', (_when, away) => {
+    attachHold(el, onHold);
+    fire(el, 'pointerdown', { pointerId: 1 });
+    away();
+    fire(el, 'pointerdown', { pointerId: 2 });
+    vi.advanceTimersByTime(HOLD_MS);
+    expect(onHold).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    ['the page is hidden', hidePage],
+    ['the window loses focus', blurWindow],
+  ])('cancels a running hold when %s', (_when, away) => {
+    attachHold(el, onHold);
+    fire(el, 'pointerdown');
+    vi.advanceTimersByTime(HOLD_MS / 2);
+    away();
+    vi.advanceTimersByTime(HOLD_MS);
+    expect(onHold).not.toHaveBeenCalled();
+  });
+
+  it('keeps a hold going when the page becomes visible', () => {
+    attachHold(el, onHold);
+    fire(el, 'pointerdown');
+    document.dispatchEvent(new Event('visibilitychange'));
+    vi.advanceTimersByTime(HOLD_MS);
+    expect(onHold).toHaveBeenCalledOnce();
+  });
+
+  it('stops listening to the page and the window after detach', () => {
+    const fromDocument = vi.spyOn(document, 'removeEventListener');
+    const fromWindow = vi.spyOn(window, 'removeEventListener');
+    attachHold(el, onHold)();
+    expect(fromDocument).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
+    expect(fromWindow).toHaveBeenCalledWith('blur', expect.any(Function));
+  });
 
   it('fires once after the hold time, not before', () => {
     attachHold(el, onHold);

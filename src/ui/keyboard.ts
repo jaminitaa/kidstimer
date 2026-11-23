@@ -9,10 +9,46 @@ function isTextField(target: EventTarget | null): boolean {
   return target instanceof HTMLElement && (TEXT_FIELDS.has(target.tagName) || target.isContentEditable);
 }
 
+type KeyHold = {
+  readonly start: (event: KeyboardEvent) => void;
+  readonly release: (event: KeyboardEvent) => void;
+  /** Cancels a running hold and forgets the held key. */
+  readonly cancel: () => void;
+};
+
+/** Holding one key down for holdMs calls onHold; releasing it first cancels. */
+function createKeyHold(onHold: () => void, holdMs: number): KeyHold {
+  let holdKey: string | null = null;
+  let timer: ReturnType<typeof setTimeout> | null = null;
+
+  const cancel = (): void => {
+    if (timer !== null) clearTimeout(timer);
+    timer = null;
+    holdKey = null;
+  };
+
+  return {
+    start(event) {
+      event.preventDefault(); // Space must never scroll the page.
+      if (event.repeat || holdKey !== null) return;
+      holdKey = event.key;
+      timer = setTimeout(() => {
+        cancel();
+        onHold();
+      }, holdMs);
+    },
+    release(event) {
+      if (event.key === holdKey) cancel();
+    },
+    cancel,
+  };
+}
+
 /**
  * Keyboard support for the MacBook: digits, Backspace and Escape drive the keypad and the
  * code screen, and holding Space or Enter for holdMs on the timer screen opens the keypad.
- * Returns a function that removes the listeners.
+ * The page being hidden or the window losing focus cancels a held key, since its keyup
+ * may never arrive. Returns a function that removes the listeners.
  */
 export function attachKeyboard(
   target: Document,
@@ -20,24 +56,8 @@ export function attachKeyboard(
   dispatch: (action: Action) => void,
   holdMs: number = HOLD_MS,
 ): () => void {
-  let holdKey: string | null = null;
-  let timer: ReturnType<typeof setTimeout> | null = null;
-
-  const cancelHold = (): void => {
-    if (timer !== null) clearTimeout(timer);
-    timer = null;
-    holdKey = null;
-  };
-
-  const startHold = (event: KeyboardEvent): void => {
-    event.preventDefault(); // Space must never scroll the page.
-    if (event.repeat || holdKey !== null) return;
-    holdKey = event.key;
-    timer = setTimeout(() => {
-      cancelHold();
-      dispatch({ type: 'open-keypad' });
-    }, holdMs);
-  };
+  const hold = createKeyHold(() => dispatch({ type: 'open-keypad' }), holdMs);
+  const win = target.defaultView;
 
   const onKeyDown = (event: KeyboardEvent): void => {
     if (event.metaKey || event.ctrlKey || event.altKey || isTextField(event.target)) return;
@@ -57,19 +77,22 @@ export function attachKeyboard(
       screenFor(state) === 'timer' &&
       state.overlay === 'none'
     ) {
-      startHold(event);
+      hold.start(event);
     }
   };
-
-  const onKeyUp = (event: KeyboardEvent): void => {
-    if (event.key === holdKey) cancelHold();
+  const onVisibility = (): void => {
+    if (target.visibilityState === 'hidden') hold.cancel();
   };
 
   target.addEventListener('keydown', onKeyDown);
-  target.addEventListener('keyup', onKeyUp);
+  target.addEventListener('keyup', hold.release);
+  target.addEventListener('visibilitychange', onVisibility);
+  win?.addEventListener('blur', hold.cancel);
   return (): void => {
-    cancelHold();
+    hold.cancel();
     target.removeEventListener('keydown', onKeyDown);
-    target.removeEventListener('keyup', onKeyUp);
+    target.removeEventListener('keyup', hold.release);
+    target.removeEventListener('visibilitychange', onVisibility);
+    win?.removeEventListener('blur', hold.cancel);
   };
 }

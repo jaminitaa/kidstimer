@@ -43,7 +43,45 @@ describe('attachKeyboard', () => {
   });
   afterEach(() => {
     detach();
+    vi.restoreAllMocks();
     vi.useRealTimers();
+  });
+
+  /** The page going into the background, or the window losing focus (Command-Tab). */
+  const hidePage = (): void => {
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    document.dispatchEvent(new Event('visibilitychange'));
+  };
+  const blurWindow = (): void => void window.dispatchEvent(new Event('blur'));
+
+  it.each([
+    ['the page is hidden', hidePage],
+    ['the window loses focus', blurWindow],
+  ])('cancels a held key, and allows a new hold, when %s', (_when, away) => {
+    press(' ');
+    vi.advanceTimersByTime(HOLD_MS / 2);
+    away();
+    vi.advanceTimersByTime(HOLD_MS);
+    expect(dispatch).not.toHaveBeenCalled();
+    // Its keyup never arrived, yet the next press starts a fresh hold.
+    press('Enter');
+    vi.advanceTimersByTime(HOLD_MS);
+    expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'open-keypad' });
+  });
+
+  it('keeps a held key going when the page becomes visible', () => {
+    press(' ');
+    document.dispatchEvent(new Event('visibilitychange'));
+    vi.advanceTimersByTime(HOLD_MS);
+    expect(dispatch).toHaveBeenCalledExactlyOnceWith({ type: 'open-keypad' });
+  });
+
+  it('stops listening to the page and the window after detach', () => {
+    const fromDocument = vi.spyOn(document, 'removeEventListener');
+    const fromWindow = vi.spyOn(window, 'removeEventListener');
+    detach();
+    expect(fromDocument).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
+    expect(fromWindow).toHaveBeenCalledWith('blur', expect.any(Function));
   });
 
   it('types digits, deletes and closes on the keypad overlay', () => {
