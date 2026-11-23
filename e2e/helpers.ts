@@ -100,16 +100,19 @@ type WakeLockWatch = Window & { kidstimerWakeLocks?: WakeLockSentinel[] };
 /**
  * Before the page loads (and on every reload), records each screen wake lock the app is
  * given, so a journey can ask whether the screen is being kept awake right now.
+ *
+ * The hook goes on WakeLock.prototype, not on navigator.wakeLock: WebKit may throw away
+ * that object's script wrapper when nothing else holds it and hand the page a fresh one,
+ * losing anything set on it. The prototype is always reachable, so the hook stays.
  */
 export async function watchWakeLock(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    const { wakeLock } = navigator;
-    if (wakeLock === undefined) return;
+    if (typeof WakeLock === 'undefined') return;
     const watch = window as WakeLockWatch;
     watch.kidstimerWakeLocks = [];
-    const request = wakeLock.request.bind(wakeLock);
-    wakeLock.request = async (type) => {
-      const sentinel = await request(type);
+    const { request } = WakeLock.prototype;
+    WakeLock.prototype.request = async function (this: WakeLock, type) {
+      const sentinel = await request.call(this, type);
       watch.kidstimerWakeLocks = [...(watch.kidstimerWakeLocks ?? []), sentinel];
       return sentinel;
     };
